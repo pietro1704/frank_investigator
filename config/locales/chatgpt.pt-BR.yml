@@ -1,0 +1,18 @@
+pt-BR:
+  chatgpt:
+    continue: "Continuar com ChatGPT (conta: %{account})"
+    connected_browser: "ChatGPT conectado. Você pode fechar esta janela."
+    denied_browser: "Login concluído, mas o uso do plano ChatGPT não foi autorizado. Você pode fechar esta janela."
+    account: "Conta %{account}: %{email} (%{client_id})"
+    permission: "Uso do plano ChatGPT: %{status}"
+    enabled: "ativado"
+    not_granted: "não autorizado"
+    usage: "Gerenciar acesso e limites: https://chatgpt.com/settings/usage"
+    status: "%{selected} %{account}: %{email} (%{client_id}); plano %{status}"
+    connected: "conectado"
+    not_connected: "não conectado"
+    usage_paused: "uso pausado após atingir um limite do plano"
+    usage_resumed: "Solicitações ao plano ChatGPT retomadas. Os limites existentes continuam valendo."
+    signed_out: "Sessão local encerrada. %{result}"
+    revoked: "Sessão renovável revogada."
+    revocation_unconfirmed: "Não foi possível confirmar a revogação remota; desconecte o aplicativo nas configurações do ChatGPT."
