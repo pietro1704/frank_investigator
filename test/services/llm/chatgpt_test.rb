@@ -62,6 +62,29 @@ class Llm::ChatgptTest < ActiveSupport::TestCase
     assert_equal 4, result.tokens.output
   end
 
+  test "live subscription stream retains done items when the terminal output is empty" do
+    save_credentials
+    # Captured from the official ChatGPT plan route; account and response IDs removed.
+    body = Rails.root.join("test/fixtures/files/chatgpt_plan_completed.sse").read
+    stub_request(:post, "https://api.openai.com/v1/responses").to_return(status: 200, body:)
+    result = chat.with_schema(Llm::RubyLlmClient.new.send(:response_schema)).ask("Assess the supplied IBGE evidence")
+    assert_equal "supported", result.content.fetch("verdict")
+    assert_includes result.content.fetch("reason_summary"), "4,83%"
+    assert_equal 205, result.tokens.input
+    assert_equal 65, result.tokens.output
+  end
+
+  test "a complete output item followed by response failure is never published" do
+    save_credentials
+    item = {
+      type: "response.output_item.done", output_index: 0,
+      item: { type: "message", status: "completed", role: "assistant", content: [ { type: "output_text", text: "provisional result" } ] }
+    }
+    body = "data: #{JSON.generate(item)}\n\n" + stream("response.failed", { "error" => { "code" => "server_error" } })
+    stub_request(:post, "https://api.openai.com/v1/responses").to_return(status: 200, body:)
+    assert_raises(Llm::Chatgpt::Error) { chat.ask("test") }
+  end
+
   test "partial text followed by a limit failure is never accepted as success" do
     save_credentials
     body = "data: #{JSON.generate(type: 'response.output_text.delta', delta: '{\"verdict\":\"supported\"}')}\n\n"

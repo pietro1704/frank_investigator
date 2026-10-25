@@ -1,0 +1,6 @@
+event: response.output_item.done
+data: {"type": "response.output_item.done", "output_index": 0, "item": {"type": "message", "status": "completed", "role": "assistant", "content": [{"type": "output_text", "text": "{\"verdict\":\"supported\",\"confidence_score\":1.0,\"reason_summary\":\"O trecho de evidência fornecido atribui ao comunicado do IBGE uma variação anual do IPCA de 4,83% em 2024, correspondendo exatamente à alegação.\"}"}]}}
+
+event: response.completed
+data: {"type": "response.completed", "response": {"status": "completed", "output": [], "usage": {"input_tokens": 205, "output_tokens": 65, "total_tokens": 270}}}
+
