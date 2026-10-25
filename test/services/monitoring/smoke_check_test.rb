@@ -63,4 +63,21 @@ class Monitoring::SmokeCheckTest < ActiveSupport::TestCase
       Monitoring::SmokeCheckJob.perform_now
     end
   end
+
+  test "paused ChatGPT usage reports the quota pause rather than asking for a new login" do
+    original_provider = Rails.configuration.x.frank_investigator.llm_provider
+    original_account = ENV["FRANK_INVESTIGATOR_CHATGPT_ACCOUNT"]
+    ENV["FRANK_INVESTIGATOR_CHATGPT_ACCOUNT"] = "test-monitor-#{SecureRandom.hex(8)}"
+    credentials = Llm::Chatgpt::Credentials.new
+    credentials.write({ "usage_paused" => true })
+    Rails.configuration.x.frank_investigator.llm_provider = "chatgpt"
+    result = Monitoring::SmokeCheck.new.send(:llm_availability)
+    assert_equal :skip, result.status
+    assert_includes result.message, "paused"
+    assert_includes result.message, "frank:chatgpt:resume"
+  ensure
+    File.delete(credentials.path) if credentials&.path&.exist?
+    Rails.configuration.x.frank_investigator.llm_provider = original_provider
+    ENV["FRANK_INVESTIGATOR_CHATGPT_ACCOUNT"] = original_account
+  end
 end

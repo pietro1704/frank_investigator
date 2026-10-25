@@ -90,6 +90,36 @@ FRANK_INVESTIGATOR_EMBEDDING_DIMENSIONS=1536
 QUARANTINED_MODELS=                        # Comma-separated models to skip
 ```
 
+### Use a ChatGPT subscription locally
+
+The `chatgpt` provider uses OpenAI's official [Sign in with ChatGPT](https://developers.openai.com/siwc/token-sharing-open-source) flow for eligible ChatGPT accounts. It does not use an OpenAI API key, OpenRouter, browser cookies, or another app's credentials. Plan eligibility and usage limits are determined by OpenAI; the app never switches to API billing when authorization or plan usage fails.
+
+Configure the environment before starting Rails (the app does not automatically load `.env` outside Foreman):
+
+```bash
+export FRANK_INVESTIGATOR_LLM_PROVIDER=chatgpt
+export FRANK_INVESTIGATOR_CHATGPT_ACCOUNT=main
+export FRANK_INVESTIGATOR_LLM_MODELS=gpt-6.1-sol
+bin/rails frank:chatgpt:login
+bin/rails frank:chatgpt:models
+```
+
+The login command opens the system browser and listens on a temporary port on `127.0.0.1`. Complete sign-in on the same computer and grant permission to use your ChatGPT plan. Use a model slug returned by `frank:chatgpt:models` for `FRANK_INVESTIGATOR_LLM_MODELS`; a completed inference request is the final access check. Cancelled sign-in, identity mismatches, truncated responses, and plan-limit errors never count as successful analysis.
+
+When OpenAI reports a plan usage limit, further requests for that account pause locally. Review the account's usage and app limits in ChatGPT Settings, then run `bin/rails frank:chatgpt:resume` when you want to try again. The app does not guess a reset time or change billing paths.
+
+Credentials stay in ignored `storage/chatgpt/` files with owner-only permissions. Access tokens refresh under an account-specific file lock, including across the web and worker processes. Each account label has its own issued OAuth client and verified identity:
+
+```bash
+ACCOUNT=work bin/rails frank:chatgpt:login   # Register a separate account/workspace
+bin/rails frank:chatgpt:status              # List accounts; * marks the selected label
+ACCOUNT=work bin/rails frank:chatgpt:logout # Revoke the renewable session and clear local tokens
+```
+
+Set `FRANK_INVESTIGATOR_CHATGPT_ACCOUNT=work` and restart Rails and workers to select that registration. Manage permissions and limits in [ChatGPT Settings → Usage](https://chatgpt.com/settings/usage). If remote revocation cannot be confirmed, the logout command says so and still clears local tokens.
+
+ChatGPT plan mode disables the optional embedding/vector path, even if vector search was enabled previously, so it cannot incur embeddings API charges. Related-investigation matching continues through the existing entity/topic retrieval and subject guardrails. Other providers retain their existing vector configuration.
+
 ## API
 
 All API endpoints authenticate with a bearer token matching `FRANK_AUTH_SECRET`.

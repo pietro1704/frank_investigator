@@ -46,6 +46,8 @@ module FrankInvestigator
       Rails.root.join("vendor/sqlite-vec/vec0.so").to_s
     )
     default_llm_models = case config.x.frank_investigator.llm_provider
+    when "chatgpt"
+      "gpt-6.1-sol"
     when "openai"
       "gpt-5-mini"
     else

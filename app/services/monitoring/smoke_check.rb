@@ -64,10 +64,12 @@ module Monitoring
     def llm_availability
       provider = Rails.application.config.x.frank_investigator.llm_provider
       models = Rails.application.config.x.frank_investigator.llm_models
-      api_key = ENV[Llm::ProviderConfig.api_key_env]
-
-      if api_key.blank?
-        return Result.new(check_name: "llm_availability", status: :skip, message: "#{Llm::ProviderConfig.api_key_env} not configured")
+      unless Llm::ProviderConfig.api_key_present?
+        message = provider == "chatgpt" ? "ChatGPT account not connected; run bin/rails frank:chatgpt:login" : "#{Llm::ProviderConfig.api_key_env} not configured"
+        if provider == "chatgpt" && Llm::Chatgpt::Credentials.new.read["usage_paused"]
+          message = "ChatGPT plan usage paused; review ChatGPT Settings > Usage, then run bin/rails frank:chatgpt:resume"
+        end
+        return Result.new(check_name: "llm_availability", status: :skip, message:)
       end
 
       if models.empty?

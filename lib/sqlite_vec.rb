@@ -8,6 +8,7 @@ module SqliteVec
   LOAD_MARKER = :@frank_investigator_sqlite_vec_loaded
 
   def enabled?
+    return false if Rails.configuration.x.frank_investigator.llm_provider == "chatgpt"
     Rails.configuration.x.frank_investigator.vector_search_enabled
   end
 
