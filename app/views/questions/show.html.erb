@@ -1,0 +1,35 @@
+<% content_for :title, t(".heading") %>
+<main class="w-full max-w-[800px] mx-auto px-4 py-8 pb-16">
+  <h1 class="font-serif text-3xl font-bold mb-4"><%= t(".heading") %></h1>
+  <p class="text-muted mb-4"><%= t(".scope") %></p>
+  <%= render "questions/form", question: @question %>
+  <% if @error %>
+    <p class="mt-4 text-verdict-red" role="alert"><%= @error %></p>
+  <% else %>
+    <p class="mt-6 text-sm text-muted"><%= t(".ordering") %></p>
+    <% if @result[:results].empty? %>
+      <p class="mt-6" role="status"><%= t(".empty") %></p>
+    <% else %>
+      <p class="mt-4"><%= t(".count", count: @result[:total], shown: @result[:results].size) %></p>
+      <ol class="mt-6 space-y-6">
+        <% @result[:results].each do |item| %>
+          <li class="border border-line rounded-2xl p-5">
+            <h2 class="text-lg font-bold"><%= link_to item[:title].presence || item[:outlet], item[:report_path] %></h2>
+            <p class="mt-2 text-sm"><%= t(".quality") %>: <strong><%= item[:quality] ? t("investigations.investigation_summary.quality_#{item[:quality]}") : t(".unrated") %></strong></p>
+            <p class="text-sm text-muted"><%= item[:outlet] %> · <%= t(".analyzed_at", date: l(item[:analyzed_at], format: :long)) %></p>
+            <% if item[:degraded] %><p class="mt-2 text-verdict-amber"><%= t(".degraded") %></p><% end %>
+            <p class="mt-3"><%= item[:conclusion] %></p>
+            <% if item[:weaknesses].any? %>
+              <ul class="mt-3 list-disc pl-5 text-sm text-muted"><% item[:weaknesses].each do |weakness| %><li><%= weakness %></li><% end %></ul>
+            <% end %>
+            <p class="mt-4 flex gap-4 text-sm underline">
+              <%= link_to t(".report"), item[:report_path] %>
+              <%= link_to t(".original"), item[:source_url], target: "_blank", rel: "noopener noreferrer" %>
+            </p>
+          </li>
+        <% end %>
+      </ol>
+    <% end %>
+  <% end %>
+  <p class="mt-8 underline"><%= link_to t(".submit_article"), root_path %></p>
+</main>
