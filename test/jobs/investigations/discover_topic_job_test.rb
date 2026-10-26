@@ -21,8 +21,8 @@ class Investigations::DiscoverTopicJobTest < ActiveJob::TestCase
     assert_equal @result, @topic.discovery
     assert_empty @topic.report
     assert_nil @topic.finished_at
-    assert_nil @topic.lease_token
-    assert_nil @topic.lease_expires_at
+    assert @topic.lease_token.present?, "assessment delivery must hold its own lease"
+    assert_enqueued_with(job: Investigations::AssessTopicJob, args: [ @topic.id, @topic.run_token ])
     assert_equal 1, @calls
   end
 

@@ -1,13 +1,14 @@
 class TopicInvestigation < ApplicationRecord
   class InvalidDiscovery < StandardError; end
+  class InvalidReport < StandardError; end
 
   LEASE_FOR = 5.minutes
-  ACTIVE_STATUSES = %w[queued researching awaiting_assessment].freeze
+  ACTIVE_STATUSES = %w[queued researching awaiting_assessment assessing].freeze
   DISCOVERY_STAGES = %w[planning searching_news reading_news screening searching_evidence reading_evidence classifying].freeze
 
   enum :status, {
     queued: "queued", researching: "researching", awaiting_assessment: "awaiting_assessment",
-    completed: "completed", no_news: "no_news", failed: "failed", cancelled: "cancelled"
+    assessing: "assessing", completed: "completed", no_news: "no_news", failed: "failed", cancelled: "cancelled"
   }, default: :queued, validate: true
 
   attr_readonly :question, :slug
@@ -31,8 +32,8 @@ class TopicInvestigation < ApplicationRecord
     token if changed == 1
   end
 
-  def execution_current?(run_token:, lease_token:)
-    execution_scope(run_token:, lease_token:).exists?
+  def execution_current?(run_token:, lease_token:, phase: "researching")
+    execution_scope(run_token:, lease_token:, phase:).exists?
   end
 
   def checkpoint!(run_token:, lease_token:, stage:, discovery:)
@@ -50,8 +51,26 @@ class TopicInvestigation < ApplicationRecord
       lease_token: nil, lease_expires_at: nil, finished_at: (Time.current if state == "no_news"), updated_at: Time.current) == 1
   end
 
-  def fail_execution!(run_token:, lease_token:, code:)
-    execution_scope(run_token:, lease_token:).update_all(status: "failed", stage: "failed", error_code: code,
+  def fail_execution!(run_token:, lease_token:, code:, phase: "researching")
+    execution_scope(run_token:, lease_token:, phase:).update_all(status: "failed", stage: "failed", error_code: code,
+      lease_token: nil, lease_expires_at: nil, finished_at: Time.current, updated_at: Time.current) == 1
+  end
+
+  def claim_assessment!(run_token:)
+    token = SecureRandom.uuid
+    changed = self.class.where(id:, run_token:, status: "awaiting_assessment").update_all(
+      status: "assessing", stage: "assessing", lease_token: token, lease_expires_at: LEASE_FOR.from_now,
+      error_code: nil, updated_at: Time.current)
+    token if changed == 1
+  end
+
+  def finish_assessment!(run_token:, lease_token:, report:)
+    valid = report.is_a?(Hash) && report["question"] == question && report["conclusion"].is_a?(String) && report["conclusion"].present?
+    articles = report["articles"] if valid
+    valid &&= articles.is_a?(Array) && articles.any? && articles.all? { |item| item.is_a?(Hash) && item["source_id"].is_a?(String) }
+    valid &&= articles.pluck("source_id").sort == Array(discovery["news_ids"]).sort
+    raise InvalidReport unless valid
+    execution_scope(run_token:, lease_token:, phase: "assessing").update_all(status: "completed", stage: "completed", report:,
       lease_token: nil, lease_expires_at: nil, finished_at: Time.current, updated_at: Time.current) == 1
   end
 
@@ -62,8 +81,8 @@ class TopicInvestigation < ApplicationRecord
 
   private
 
-  def execution_scope(run_token:, lease_token:)
-    self.class.where(id:, run_token:, lease_token:, status: "researching")
+  def execution_scope(run_token:, lease_token:, phase: "researching")
+    self.class.where(id:, run_token:, lease_token:, status: phase)
   end
 
   def validate_discovery!(value)

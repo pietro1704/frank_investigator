@@ -14,7 +14,10 @@ module Investigations
           persisted = topic.checkpoint!(run_token:, lease_token:, stage:, discovery: snapshot)
           raise TopicDiscovery::Cancelled unless persisted
         })
-      topic.finish_discovery!(run_token:, lease_token:, discovery: result)
+      persisted = topic.finish_discovery!(run_token:, lease_token:, discovery: result)
+      if persisted && result["status"] == "discovered"
+        ActiveRecord.after_all_transactions_commit { TopicResearchDelivery.dispatch(topic_id, run_token) }
+      end
     rescue TopicDiscovery::Cancelled
       topic.fail_execution!(run_token:, lease_token:, code: "interrupted") if topic && lease_token
     rescue StandardError => error

@@ -5,9 +5,14 @@
     <p class="mb-4 text-muted text-xs font-semibold tracking-[0.18em] uppercase"><%= t(".eyebrow") %></p>
     <h1 class="mb-4 font-serif text-[clamp(2.4rem,5vw,3.8rem)] leading-[1.05] font-extrabold tracking-tight"><%= t(".heading") %></h1>
     <p class="text-muted text-lg leading-relaxed max-w-xl"><%= t(".hero_copy") %></p>
-    <%= render "questions/form", question: "" %>
+    <nav class="mt-6 flex gap-4 text-sm underline" aria-label="<%= t('topics.navigation') %>">
+      <a href="#topic-investigation"><%= t("topics.heading") %></a>
+      <a href="#article-analysis"><%= t("topics.analyze_url") %></a>
+    </nav>
+    <section id="topic-investigation"><%= render "topic_investigations/form", question: "" %></section>
+    <details class="mt-6"><summary class="cursor-pointer text-sm underline"><%= t("topics.archive") %></summary><%= render "questions/form", question: "" %></details>
 
-    <%= form_with url: submit_investigation_path, method: :post, class: "mt-9", local: true do |form| %>
+    <%= form_with url: submit_investigation_path, method: :post, id: "article-analysis", class: "mt-9", local: true do |form| %>
       <div>
         <%= form.label :main_url, t(".main_story_label"), class: "block text-sm font-bold text-ink" %>
         <p id="main-url-help" class="mt-1.5 text-sm leading-relaxed text-muted"><%= t(".main_story_help") %></p>

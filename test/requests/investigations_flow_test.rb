@@ -5,7 +5,7 @@ class InvestigationsFlowTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_response :success
-    assert_includes response.body, "Investigate a news article"
+    assert_select "h1", text: I18n.t("investigations.home.heading")
   end
 
   test "redirects submitted urls to the normalized canonical form" do

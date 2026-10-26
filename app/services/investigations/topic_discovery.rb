@@ -97,12 +97,15 @@ module Investigations
     end
 
     def search(queries)
-      queries.flat_map do |query|
+      pages = queries.map do |query|
         check_cancelled!
         results = @searcher.call(query:, max_results: 5)
         check_cancelled!
         results.first(5)
-      end.uniq(&:url)
+      end
+      # Spend the bounded reading budget across queries, including queries for
+      # contrary evidence, rather than only reading the first query's results.
+      pages.map(&:size).max.to_i.times.flat_map { |index| pages.filter_map { |page| page[index] } }.uniq(&:url)
     end
 
     def read(candidates, role:, limit:)

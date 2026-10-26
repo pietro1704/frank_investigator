@@ -1,0 +1,69 @@
+{
+  "question": "O desmatamento na Amazônia caiu em 2024?",
+  "conclusion": "Depende do território e do indicador. Para o ano civil de 2024, o Imazon informa queda de 7% no desmatamento monitorado pelo SAD na Amazônia brasileira: de 4.030 km² em 2023 para 3.739 km². Isso sustenta a afirmação central do G1 nesse recorte, mas não autoriza generalizá-la para toda a Amazônia. Para os oito países membros da OTCA, o ORA informa aumento do desmatamento em 2024 frente a 2023, em uma série distinta. A queda nacional de 32,4% atribuída pela REPAM ao MapBiomas não pode ser confirmada com os documentos originais fornecidos.",
+  "limitations": [
+    "A pergunta não especifica território, indicador, base de comparação ou se 2024 significa ano civil ou ciclo de monitoramento.",
+    "SAD, Prodes e a série processada pelo ORA têm recortes distintos; os documentos não oferecem uma harmonização metodológica que permita comparar diretamente seus valores.",
+    "A publicação do INPE em S6 apresenta uma estimativa de 6.288 km² para agosto de 2023 a julho de 2024; S7 informa posteriormente 6.518 km² para a taxa de 2024. Esses números não devem ser tratados como o mesmo estágio de apuração nem como totais do ano civil.",
+    "Não foi fornecida a publicação original do MapBiomas citada pela REPAM, nem documentação original suficiente para verificar todas as afirmações sobre queimadas e degradação do G1.",
+    "As páginas de índice e catálogo S5 e S8 não foram utilizadas como evidência."
+  ],
+  "articles": [
+    {
+      "source_id": "S2",
+      "verdict": "supported",
+      "overall_quality": "mixed",
+      "article_quote": "Já em relação ao desmatamento, no ano passado, 3.739 km² de floresta foram derrubados na Amazônia Legal, menos do que os 4.030 km² registrados em 2023. Isso é uma redução de 7%.",
+      "conclusion": "A queda de 7% em 2024 frente a 2023 é sustentada pela publicação do próprio Imazon, produtor do SAD. A conclusão vale para esse sistema e recorte brasileiro, não para toda a Amazônia internacional. O apoio à afirmação central não confirma automaticamente os demais números e explicações da reportagem.",
+      "strengths": [
+        "Identifica o SAD/Imazon, apresenta os valores comparados e delimita o território como Amazônia Legal.",
+        "Distingue desmatamento de degradação e alerta que SAD e Deter não equivalem à taxa oficial de desmatamento."
+      ],
+      "weaknesses": [
+        "O título usa apenas 'Amazônia', expressão mais ampla que o recorte brasileiro explicitado no corpo.",
+        "O valor de 2022, de 10.573 km², diverge dos 10.362 km² apresentados pelo Imazon em S1.",
+        "A expressão 'número de árvores perdidas' é comparada a campos de futebol, que medem área, não quantidade de árvores.",
+        "O corpo disponível de S1 não apresenta o total anual de degradação nem o cálculo dos 497%; a explicação pelas queimadas aparece como atribuição dos pesquisadores, sem análise causal independente nos documentos fornecidos."
+      ],
+      "evidence": [
+        {
+          "source_id": "S1",
+          "quote": "De janeiro a dezembro, foram derrubados 3.739 km², 7% a menos do que no mesmo período de 2023, quando a devastação atingiu 4.030 km².",
+          "relationship": "supports",
+          "primary_reason": "O Imazon publica os resultados do SAD, sistema que ele próprio opera para monitorar desmatamento por satélite. O trecho informa a área desmatada no recorte amazônico brasileiro monitorado pelo sistema, comparando janeiro a dezembro de 2024 com o mesmo período de 2023."
+        },
+        {
+          "source_id": "S3",
+          "quote": "O desmatamento cresceu 256% e a degradação 64% em 2024, em relação a 2023. Em 2024 o desmatamento saiu de 10.391 km², em 2023, para 37.033 km² e a degradação passou de 16.709 km² para 27.349 km2, segundo os dados processados pelo ORA.",
+          "relationship": "context",
+          "primary_reason": "A OTCA publica resultados processados por seu Observatório Regional Amazônico a partir de informações Copernicus/JRC. É a produtora dessa agregação para a Amazônia dos oito países membros, comparando 2024 com 2023, não dos dados SAD brasileiros. A série contextualiza o limite territorial da conclusão, sem refutar diretamente a medição do Imazon."
+        }
+      ]
+    },
+    {
+      "source_id": "S4",
+      "verdict": "needs_more_evidence",
+      "overall_quality": "insufficient",
+      "article_quote": "O Brasil registrou em 2024 uma redução de 32,4% no desmatamento em relação ao ano anterior, de acordo com o relatório anual da Rede MapBiomas divulgado em maio.",
+      "conclusion": "A afirmação central é uma queda nacional de 32,4%, e não exclusivamente amazônica. Sem a publicação original do MapBiomas, não é possível confirmar esse percentual nem os indicadores específicos da Amazônia apresentados pela REPAM. O SAD oferece evidência de queda em outro recorte, mas não valida os números atribuídos ao MapBiomas.",
+      "strengths": [
+        "Identifica a fonte alegada, o ano de referência e a comparação com o ano anterior.",
+        "Ressalta que uma redução anual não significa interrupção da perda de vegetação."
+      ],
+      "weaknesses": [
+        "Não há, no conjunto fornecido, evidência original para a queda nacional de 32,4%, a participação de 67% da Amazônia Legal ou os demais números atribuídos ao MapBiomas.",
+        "Alterna Amazônia Legal e bioma Amazônia sem explicar que são delimitações diferentes; a participação atribuída ao Cerrado exige essa distinção para ser interpretada.",
+        "A equivalência entre hectares perdidos e sete árvores por segundo não apresenta método ou densidade de árvores utilizada.",
+        "As atribuições à expansão agropecuária e urbana e as afirmações sobre garimpo permanecem sem documentação original verificável no material fornecido."
+      ],
+      "evidence": [
+        {
+          "source_id": "S1",
+          "quote": "De janeiro a dezembro, foram derrubados 3.739 km², 7% a menos do que no mesmo período de 2023, quando a devastação atingiu 4.030 km².",
+          "relationship": "context",
+          "primary_reason": "O Imazon é o produtor do monitoramento SAD que origina esses totais de área desmatada no recorte amazônico brasileiro em janeiro–dezembro de 2024 e de 2023. A medição contextualiza a existência de uma queda regional, mas não produz nem confirma a estatística nacional de 32,4% atribuída ao MapBiomas."
+        }
+      ]
+    }
+  ]
+}

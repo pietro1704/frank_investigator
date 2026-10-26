@@ -172,4 +172,17 @@ class Investigations::SubmitTopicTest < ActiveSupport::TestCase
       assert consumed.include?("*") || consumed.include?(task.fetch("queue"))
     end
   end
+
+  test "assessment handoff is durable and recovered with the assessment job rather than another search" do
+    topic = TopicInvestigation.create!(question: "Vacinas infantis", status: :awaiting_assessment)
+    assert_enqueued_with(job: Investigations::AssessTopicJob, args: [ topic.id, topic.run_token ]) do
+      assert Investigations::TopicResearchDelivery.dispatch(topic.id, topic.run_token)
+    end
+    assert_not Investigations::TopicResearchDelivery.dispatch(topic.id, topic.run_token)
+    clear_enqueued_jobs
+    travel 6.minutes do
+      assert_enqueued_with(job: Investigations::AssessTopicJob) { Investigations::RecoverTopicResearchJob.perform_now }
+    end
+    refute enqueued_jobs.any? { |job| job[:job] == Investigations::DiscoverTopicJob }
+  end
 end

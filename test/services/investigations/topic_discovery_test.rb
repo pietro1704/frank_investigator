@@ -25,7 +25,7 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
   end
 
   class Searcher
-    attr_reader :calls
+    attr_reader :calls, :answers
 
     def initialize(answers)
       @answers = answers
@@ -69,12 +69,8 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
     evidence = fixture("evidence_candidates")
     plan = @responses.fetch(:plan)
     screen = @responses.fetch(:screen)
-    @searcher = Searcher.new({
-      plan.fetch("news_queries")[0] => news.first(5),
-      plan.fetch("news_queries")[1] => news.drop(5),
-      screen.fetch("evidence_queries")[0] => evidence.first(5),
-      screen.fetch("evidence_queries")[1] => evidence.drop(5)
-    })
+    @searcher = Searcher.new(distributed(plan.fetch("news_queries"), news).merge(
+      distributed((screen.fetch("evidence_queries") + plan.fetch("evidence_queries")).uniq, evidence)))
     @fetcher = Fetcher.new(fixture("documents"))
   end
 
@@ -143,11 +139,8 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
     news = fixture("news_candidates")
     alias_item = news.first.merge("url" => "#{news.first.fetch('url')}?utm_source=duplicate")
     plan = @responses[:plan]
-    @searcher = Searcher.new({
-      plan.fetch("news_queries")[0] => news.first(2) + [ alias_item ] + news[2, 2],
-      plan.fetch("news_queries")[1] => news.drop(4),
-      @responses[:screen].fetch("evidence_queries")[0] => fixture("evidence_candidates").first(5)
-    })
+    @searcher = Searcher.new(distributed(plan.fetch("news_queries"), news.first(2) + [ alias_item ] + news.drop(2)).merge(
+      @responses[:screen].fetch("evidence_queries")[0] => fixture("evidence_candidates").first(5)))
     result = discover
     assert_equal %w[S2 S4], result.fetch("news_ids")
     assert_equal 1, @fetcher.calls.count(news.first.fetch("url"))
@@ -184,6 +177,20 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
     assert_empty result.fetch("documents")
     assert_equal 6, result.fetch("failures").size
     assert result.fetch("failures").all? { |item| item.fetch("reason") == "fetch_failed" }
+  end
+
+  test "an early query full of unreadable results cannot starve original sources found by another query" do
+    queries = (@responses[:screen].fetch("evidence_queries") + @responses[:plan].fetch("evidence_queries")).uniq
+    answers = @searcher.answers.merge(queries.index_with { [] })
+    answers[queries[0]] = 5.times.map { |i| { "url" => "https://example.com/unreadable-#{i}.pdf", "title" => "Unreadable result", "snippet" => "" } }
+    document = fixture("documents").find { |item| item.fetch("id") == "S6" }
+    answers[queries[1]] = [ { "url" => document.fetch("url"), "title" => document.fetch("title"), "snippet" => "" } ]
+    @searcher = Searcher.new(answers)
+    @responses[:classify]["documents"].select! { |item| %w[S1 S2 S3 S4 S5 S6].include?(item.fetch("id")) }
+    result = discover
+    assert_includes result.fetch("producer_ids"), "S6"
+    assert_equal document.fetch("url"), result.fetch("documents").last.fetch("url")
+    assert_equal %w[S2 S4], result.fetch("news_ids")
   end
 
   test "private search result URLs are rejected before opening a browser" do
@@ -264,6 +271,10 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
 
   def fixture(name)
     JSON.parse(File.read(FIXTURES.join("#{name}.json")))
+  end
+
+  def distributed(queries, results)
+    queries.each_with_index.to_h { |query, index| [ query, results.each_slice(queries.size).filter_map { |slice| slice[index] } ] }
   end
 
   def discover(question: QUESTION, **options)

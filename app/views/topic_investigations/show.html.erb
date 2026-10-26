@@ -1,0 +1,57 @@
+<% active = TopicInvestigation::ACTIVE_STATUSES.include?(@topic.status) %>
+<% content_for :title, @topic.question %>
+<% if active %><% content_for :head do %><meta http-equiv="refresh" content="5"><% end %><% end %>
+<main class="w-full max-w-[800px] mx-auto px-4 py-8 pb-16">
+  <p class="mb-6 underline"><%= link_to t("topics.new_search"), new_topic_investigation_path %></p>
+  <h1 class="font-serif text-3xl font-bold mb-4"><%= @topic.question %></h1>
+  <p class="text-muted mb-4"><%= t("topics.brief_scope") %></p>
+  <% if @notice %><p role="alert" class="mb-4"><%= @notice %></p><% end %>
+  <% if active %>
+    <section role="status" class="border border-line rounded-2xl p-5">
+      <h2 class="font-bold"><%= t("topics.stages.#{@topic.stage}", default: t("topics.states.#{@topic.status}")) %></h2>
+      <p class="mt-2 text-muted"><%= t("topics.progress", count: Array(@topic.discovery["documents"]).size) %></p>
+      <% if @topic.error_code == "enqueue_failed" %><p class="mt-3"><%= t("topics.errors.enqueue_failed") %></p><% end %>
+      <%= button_to t("topics.cancel"), cancel_topic_investigation_path(@topic), method: :post, class: "mt-4 underline" %>
+    </section>
+  <% elsif @topic.completed? %>
+    <% report = @topic.report; documents = Array(@topic.discovery["documents"]).index_by { |item| item["id"] } %>
+    <p class="text-sm text-muted mb-4"><%= t("topics.assessed_at", date: l(@topic.finished_at, format: :long)) %></p>
+    <p class="leading-relaxed mb-4"><%= report["conclusion"] %></p>
+    <details class="mb-6"><summary class="cursor-pointer font-semibold"><%= t("topics.scope_and_limits") %></summary>
+      <p class="mt-3"><%= report["scope"] %></p>
+      <ul class="mt-3 list-disc pl-5"><% Array(report["limitations"]).each do |text| %><li><%= text %></li><% end %></ul>
+    </details>
+    <% Array(report["articles"]).each do |item| %>
+      <% source = documents.fetch(item.fetch("source_id")) %>
+      <article class="mt-8" data-source-id="<%= item["source_id"] %>">
+        <h2 class="font-serif text-2xl font-bold mb-3"><%= source["title"] %></h2>
+        <p class="mb-3"><span class="<%= badge_class_for(item["verdict"]) %>"><%= t("topics.verdicts.#{item['verdict']}") %></span></p>
+        <blockquote class="border-l-4 border-line pl-4 text-sm mb-4"><%= item["article_quote"] %></blockquote>
+        <% if (url = topic_source_url(source["url"])) %><p class="mb-4 underline"><%= link_to t("topics.original"), url, target: "_blank", rel: "noopener noreferrer" %></p><% end %>
+        <%= render "investigations/editorial_summary", summary: item %>
+        <details class="mb-6"><summary class="font-semibold cursor-pointer"><%= t("topics.evidence", count: Array(item["evidence"]).size) %></summary>
+          <% Array(item["evidence"]).each do |evidence| %>
+            <% cited = documents.fetch(evidence.fetch("source_id")) %>
+            <section class="mt-4 border border-line rounded-xl p-4">
+              <h3 class="font-bold"><%= cited["title"] %></h3>
+              <p class="text-sm text-muted"><%= t("topics.relationships.#{evidence['relationship']}") %></p>
+              <blockquote class="mt-2 text-sm"><%= evidence["quote"] %></blockquote>
+              <% if evidence["primary_reason"].present? %><p class="mt-2 text-sm text-muted"><%= evidence["primary_reason"] %></p><% end %>
+              <% if (url = topic_source_url(cited["url"])) %><p class="mt-3 underline"><%= link_to t("topics.read_source"), url, target: "_blank", rel: "noopener noreferrer" %></p><% end %>
+            </section>
+          <% end %>
+          <% if Array(item["evidence"]).empty? %><p class="mt-3"><%= t("topics.no_evidence") %></p><% end %>
+        </details>
+      </article>
+    <% end %>
+  <% else %>
+    <p role="status" class="font-semibold"><%= t("topics.states.#{@topic.status}") %></p>
+    <% if @topic.error_code %><p class="mt-3"><%= t("topics.errors.#{@topic.error_code}", default: t("topics.errors.research_failed")) %></p><% end %>
+    <% if @topic.status.in?(%w[failed cancelled no_news]) %><%= button_to t("topics.retry"), restart_topic_investigation_path(@topic), method: :post, class: "mt-5 underline" %><% end %>
+  <% end %>
+  <% if Array(@topic.discovery["failures"]).any? %>
+    <details class="mt-8"><summary class="cursor-pointer font-semibold"><%= t("topics.unreadable_sources") %></summary>
+      <ul class="mt-3 space-y-3 text-sm"><% @topic.discovery["failures"].each do |item| %><li><%= item["url"] %> — <%= t("topics.source_errors.#{item['reason']}", default: t("topics.source_errors.fetch_failed")) %></li><% end %></ul>
+    </details>
+  <% end %>
+</main>
