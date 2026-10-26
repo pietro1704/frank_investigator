@@ -5,6 +5,7 @@
     <p class="mb-4 text-muted text-xs font-semibold tracking-[0.18em] uppercase"><%= t(".eyebrow") %></p>
     <h1 class="mb-4 font-serif text-[clamp(2.4rem,5vw,3.8rem)] leading-[1.05] font-extrabold tracking-tight"><%= t(".heading") %></h1>
     <p class="text-muted text-lg leading-relaxed max-w-xl"><%= t(".hero_copy") %></p>
+    <%= render "questions/form", question: "" %>
 
     <%= form_with url: submit_investigation_path, method: :post, class: "mt-9", local: true do |form| %>
       <div>

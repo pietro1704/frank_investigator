@@ -44,6 +44,7 @@ en:
       opensource_body_html: 'The complete source code of Frank Investigator is publicly available under the <a href="https://github.com/akitaonrails/frank_investigator" target="_blank" rel="noopener" class="underline hover:text-ink">GNU Affero General Public License v3.0</a>. Anyone may inspect, audit, reproduce, or improve the analysis methodology.'
 
     methodology:
+      questions_heading: "Questions and reading recommendations"
       title: "Methodology — Frank Investigator"
       heading: "How to read a report"
       link_text: "How to read a report"
@@ -91,6 +92,26 @@ en:
         - "Insufficient (grey): Not enough evidence to assess meaningfully — too few checkable claims or the article is primarily opinion/editorial."
       calibration_heading: "Calibration"
       calibration_body: "The scoring system is calibrated to distinguish normal editorial imperfections from deliberate manipulation. A score of 0.2 from five different analyzers does not equal one score of 1.0 — it means the article has normal imperfections. Only signals above the noise threshold (25%) are counted as significant. The system errs on the side of caution: it would rather call a manipulative article 'mixed' than falsely accuse an honest article of manipulation."
+
+  questions:
+    form:
+      label: "Ask Frank about a topic"
+      placeholder: "For example: were the Brazilian elections in 2022 honest?"
+      submit: "Find analyzed news"
+    show:
+      heading: "News related to your question"
+      scope: "Searches Frank's local archive by words in titles, conclusions and claims. This list suggests reading; it does not decide whether your question is true. No new web search or analysis is started."
+      ordering: "Ordered by Frank's stored editorial quality: strong, mixed, weak, insufficient, then unrated. Within each rating, word overlap and analysis date break ties. Confidence in a claim verdict is not an article quality score."
+      empty: "No ready reports related to this question were found in the archive. Try different topic words or submit a news article for analysis. Absence of reports is not evidence for or against the question."
+      count: "%{shown} of %{count} related reports"
+      quality: "Frank quality rating"
+      unrated: "Not rated"
+      analyzed_at: "Analysis updated: %{date}"
+      degraded: "This report contains failed analysis steps or model calls. Read it with caution."
+      report: "Read Frank's report"
+      original: "Read original article"
+      submit_article: "Analyze another article"
+      invalid: "Enter a question with topic words and at most %{max} characters."
 
   investigations:
     home:

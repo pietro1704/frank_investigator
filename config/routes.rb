@@ -26,6 +26,7 @@ Rails.application.routes.draw do
   # Static pages — public, no auth
   get "terms" => "pages#terms", as: :terms
   get "methodology" => "pages#methodology", as: :methodology
+  get "questions" => "questions#show", as: :question_search
 
   # Submission form — basic auth via FRANK_AUTH_SECRET
   post "/", to: "investigations#create", as: :submit_investigation

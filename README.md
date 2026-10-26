@@ -22,6 +22,8 @@ A fact does not become false because a million sources repeat a falsehood, and a
 
 ## What It Does
 
+- **Questions and reading recommendations:** ask a question on the home page or `GET /questions?question=...` (`.json` for structured results). The read-only search matches words in stored titles, conclusions and claims, folds accents and common plurals, and preserves specified years and supported country terms. Up to ten ready reports are ranked by existing editorial quality (`strong`, `mixed`, `weak`, `insufficient`, unrated), then word overlap and analysis date. It shows original/report links, stored conclusions and limitations; it does not generate a verdict on the question, search the web, or start new analyses. Confidence in a verdict is not used as an article quality score. No LLM or embeddings are needed.
+
 - Fetches articles via headless Chromium with stealth hardening and adaptive timeouts
 - Supports grouped submissions with manual peer reports and durable evidence sources
 - Extracts main content with noise filtering (ads, sidebars, comment sections, trending lists)

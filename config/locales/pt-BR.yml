@@ -44,6 +44,7 @@ pt-BR:
       opensource_body_html: 'O código-fonte completo do Frank Investigator está publicamente disponível sob a <a href="https://github.com/akitaonrails/frank_investigator" target="_blank" rel="noopener" class="underline hover:text-ink">Licença Pública Geral Affero GNU v3.0</a>. Qualquer pessoa pode inspecionar, auditar, reproduzir ou melhorar a metodologia de análise.'
 
     methodology:
+      questions_heading: "Perguntas e sugestões de leitura"
       title: "Metodologia — Frank Investigator"
       heading: "Como ler um relatório"
       link_text: "Como ler um relatório"
@@ -91,6 +92,26 @@ pt-BR:
         - "Insuficiente (cinza): Evidência insuficiente para avaliar significativamente — poucas alegações verificáveis ou o artigo é predominantemente opinião/editorial."
       calibration_heading: "Calibração"
       calibration_body: "O sistema de pontuação é calibrado para distinguir imperfeições editoriais normais de manipulação deliberada. Uma pontuação de 0,2 em cinco analisadores diferentes não equivale a uma pontuação de 1,0 — significa que o artigo tem imperfeições normais. Apenas sinais acima do limiar de ruído (25%) são contados como significativos. O sistema erra pelo lado da cautela: prefere classificar um artigo manipulativo como 'misto' a acusar falsamente um artigo honesto de manipulação."
+
+  questions:
+    form:
+      label: "Pergunte ao Frank sobre um assunto"
+      placeholder: "Exemplo: as eleições brasileiras de 2022 foram honestas?"
+      submit: "Encontrar notícias analisadas"
+    show:
+      heading: "Notícias relacionadas à sua pergunta"
+      scope: "Consulta o acervo local do Frank por palavras nos títulos, conclusões e afirmações. A lista sugere leituras; ela não decide se sua pergunta é verdadeira. Nenhuma nova busca na web ou análise é iniciada."
+      ordering: "Ordem pela qualidade editorial já atribuída pelo Frank: forte, mista, fraca, insuficiente e, por último, sem avaliação. Empates usam palavras em comum e data da análise. Confiança no veredito de uma afirmação não é nota de qualidade da notícia."
+      empty: "Não há relatórios prontos relacionados a essa pergunta no acervo. Tente outras palavras do assunto ou envie uma notícia para análise. A ausência de relatórios não comprova nem refuta a pergunta."
+      count: "%{shown} de %{count} relatórios relacionados"
+      quality: "Avaliação do Frank"
+      unrated: "Sem avaliação"
+      analyzed_at: "Análise atualizada: %{date}"
+      degraded: "Este relatório contém etapas de análise ou chamadas ao modelo que falharam. Leia com ressalvas."
+      report: "Ler relatório do Frank"
+      original: "Ler notícia original"
+      submit_article: "Analisar outra notícia"
+      invalid: "Digite uma pergunta com palavras do assunto e no máximo %{max} caracteres."
 
   investigations:
     home:
