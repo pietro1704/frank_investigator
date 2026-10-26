@@ -20,13 +20,16 @@ module Investigations
       new(question:, **options).call
     end
 
-    def initialize(question:, model: ResearchModel.new, searcher: Fetchers::WebSearcher,
-      fetcher: Fetchers::ChromiumFetcher, cancelled: -> { false }, on_progress: ->(*) { })
+    def self.normalize_question(question)
       unless question.is_a?(String) && question.strip.length.between?(1, MAX_QUESTION_LENGTH) && question.match?(/\p{L}/)
         raise InvalidQuestion
       end
+      question.strip
+    end
 
-      @question = question.strip
+    def initialize(question:, model: ResearchModel.new, searcher: Fetchers::WebSearcher,
+      fetcher: Fetchers::ChromiumFetcher, cancelled: -> { false }, on_progress: ->(*) { })
+      @question = self.class.normalize_question(question)
       @model, @searcher, @fetcher = model, searcher, fetcher
       @cancelled, @on_progress = cancelled, on_progress
       @visited = Set.new
@@ -133,7 +136,7 @@ module Investigations
         rescue UrlNormalizer::InvalidUrlError
           attempts += 1
           @result.fetch("failures") << { "url" => candidate.url, "reason" => "unsafe_url" }
-        rescue Fetchers::ChromiumFetcher::FetchError, Timeout::Error
+        rescue Fetchers::ChromiumFetcher::FetchError, Ferrum::StatusError, Timeout::Error
           @result.fetch("failures") << { "url" => candidate.url, "reason" => "fetch_failed" }
         end
         progress(stage)

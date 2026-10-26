@@ -42,7 +42,7 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
 
   class Fetcher
     attr_reader :calls
-    attr_accessor :after_read
+    attr_accessor :after_read, :error
 
     def initialize(documents)
       @documents = documents.index_by { |item| item.fetch("url") }
@@ -51,6 +51,7 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
 
     def call(url)
       @calls << url
+      raise error if error
       item = @documents.fetch(url) { raise Fetchers::ChromiumFetcher::FetchError, "unreadable page" }
       body = item.fetch("body").split("\n").reject(&:blank?).map { |text| "<p>#{CGI.escapeHTML(text)}</p>" }.join
       after_read&.call
@@ -174,6 +175,15 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
     assert_equal 6, result.fetch("failures").size
     assert result.fetch("failures").all? { |item| item.fetch("reason") == "fetch_failed" }
     assert_equal [ :plan ], @model.calls.map(&:first)
+  end
+
+  test "browser network status errors are source failures rather than aborting the whole research" do
+    @fetcher.error = Ferrum::StatusError.new("https://example.com/unavailable")
+    result = discover
+    assert_equal "no_news", result.fetch("status")
+    assert_empty result.fetch("documents")
+    assert_equal 6, result.fetch("failures").size
+    assert result.fetch("failures").all? { |item| item.fetch("reason") == "fetch_failed" }
   end
 
   test "private search result URLs are rejected before opening a browser" do
