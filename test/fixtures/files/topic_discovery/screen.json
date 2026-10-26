@@ -1,0 +1,38 @@
+{
+  "reviews": [
+    {
+      "id": "S1",
+      "relevant": true,
+      "reason": "Apresenta dados do SAD/Imazon sobre o desmatamento de janeiro a dezembro de 2024, com comparações explícitas com 2023 e 2022. É diretamente pertinente ao ano civil, mas a delimitação territorial do monitoramento precisa ser confirmada antes de generalizar para toda a Amazônia.",
+      "scope_quote": "A floresta amazônica teve em 2024 o segundo ano consecutivo de queda no desmatamento, após uma sequência de cinco anos com recordes negativos de destruição. De janeiro a dezembro, foram derrubados 3.739 km², 7% a menos do que no mesmo período de 2023, quando a devastação atingiu 4.030 km²."
+    },
+    {
+      "id": "S2",
+      "relevant": true,
+      "reason": "Relata diretamente a variação do desmatamento em 2024 na Amazônia Legal brasileira, comparando-a com 2023 e identificando o SAD/Imazon como fonte. Esse recorte territorial não equivale necessariamente à Amazônia inteira. Compartilha a base de S1, portanto não constitui confirmação independente.",
+      "scope_quote": "A Amazônia Legal encerrou 2024 com uma redução de 7% no desmatamento, mas a degradação ambiental aumentou 497%, puxada principalmente pelas queimadas de agosto e setembro do ano passado."
+    },
+    {
+      "id": "S3",
+      "relevant": true,
+      "reason": "Embora o foco principal seja 2025, contém análise substantiva e comparação explícita do desmatamento de 2024 com 2023, no contexto dos oito países membros da OTCA. É pertinente à pergunta sem delimitação nacional; a abrangência e a metodologia do ORA/JRC devem ser examinadas separadamente das bases brasileiras.",
+      "scope_quote": "O desmatamento cresceu 256% e a degradação 64% em 2024, em relação a 2023. Em 2024 o desmatamento saiu de 10.391 km², em 2023, para 37.033 km² e a degradação passou de 16.709 km² para 27.349 km2, segundo os dados processados pelo ORA."
+    },
+    {
+      "id": "S4",
+      "relevant": true,
+      "reason": "Aborda diretamente o desmatamento amazônico em 2024 e apresenta comparação com 2023 para alertas de grandes desmatamentos, citando o relatório anual da Rede MapBiomas. É necessário distinguir área desmatada, número de alertas, bioma Amazônia e Amazônia Legal; a redução nacional não deve ser automaticamente atribuída à Amazônia.",
+      "scope_quote": "Na Amazônia, embora os índices tenham caído, o ritmo de destruição ainda assusta. Em 2024, o bioma perdeu, em média, 1.035 hectares por dia — o que equivale a cerca de 7 árvores por segundo. O número de alertas de grandes desmatamentos (acima de 100 hectares) caiu 31% em comparação com 2023, mas a região continua sendo o epicentro da devastação nacional."
+    },
+    {
+      "id": "S5",
+      "relevant": true,
+      "reason": "Reúne resultados mensais de desmatamento na Amazônia Legal brasileira durante 2024, incluindo outubro explicitamente datado e registros atribuídos ao DETER/INPE. Contribui para investigar a evolução dentro do ano, mas não oferece um balanço anual que, sozinho, responda se houve queda em 2024.",
+      "scope_quote": "O Instituto de Pesquisa Espacial (INPE) divulgou os dados de desmatamento de outubro de 2024 para a Amazônia e Cerrado. Em outubro a área desmatada da Amazônia Legal Brasileira (ALB) foi de 532.71 quilômetros"
+    }
+  ],
+  "evidence_queries": [
+    "Imazon SAD \"2024\" \"janeiro a dezembro\" \"desmatamento\" \"Amazônia Legal\"",
+    "\"Observatório Regional Amazônico\" \"2024\" \"2023\" \"desmatamento\" \"JRC\""
+  ]
+}

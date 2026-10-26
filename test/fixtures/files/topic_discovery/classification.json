@@ -1,0 +1,52 @@
+{
+  "documents": [
+    {
+      "id": "S1",
+      "kind": "producer_publication",
+      "reason": "Publicação do Imazon que apresenta resultados do SAD, identificado no corpo como sistema do próprio instituto. A classificação decorre dessa relação com a produção dos dados, não do domínio nem da validação das afirmações. Embora haja uma mensagem de erro no início, o corpo contém uma publicação específica.",
+      "quote": "Os dados são do Sistema de Alerta de Desmatamento (SAD) do instituto de pesquisa Imazon, que monitora a região por imagens de satélite desde 2008."
+    },
+    {
+      "id": "S2",
+      "kind": "news_article",
+      "reason": "Reportagem individual com título e texto próprios, que apresenta e contextualiza levantamentos atribuídos ao Imazon e ao MapBiomas. Não se apresenta como produtora desses dados; as comparações metodológicas são declarações atribuídas às fontes.",
+      "quote": "Os dados são do Sistema de Alerta de Desmatamento (SAD) do instituto, que diferem da metodologia do Deter, do Instituto Nacional de Pesquisas Espaciais (Inpe), que também divulgou números no começo deste mês."
+    },
+    {
+      "id": "S3",
+      "kind": "producer_publication",
+      "reason": "Publicação da OTCA sobre processamento e análises realizados por seu Observatório Regional Amazônico. O texto explicita que os insumos são externos, do Copernicus/JRC: a condição de produtor refere-se ao processamento e às análises apresentados, não à origem de todos os dados. O recorte abrange oito países e enfatiza 2025 em comparação com 2024.",
+      "quote": "Os dados foram processados pelo Observatório Regional Amazônico (ORA) da OTCA com base em informações do programa europeu Copernicus, por meio do Joint Research Centre (JRC), e estão disponíveis em mapas e gráficos na plataforma do ORA."
+    },
+    {
+      "id": "S4",
+      "kind": "news_article",
+      "reason": "Texto individual sobre o tema, com título, desenvolvimento e seções próprias, baseado em relatório externo atribuído ao MapBiomas. Inclui posicionamento institucional da REPAM, mas seu conteúdo principal é a apresentação comentada desse levantamento, sem indicação de que a REPAM tenha produzido os dados.",
+      "quote": "O Brasil registrou em 2024 uma redução de 32,4% no desmatamento em relação ao ano anterior, de acordo com o relatório anual da Rede MapBiomas divulgado em maio."
+    },
+    {
+      "id": "S5",
+      "kind": "index_or_other",
+      "reason": "Arquivo anual composto por várias chamadas e trechos de publicações distintas, e não por uma reportagem individual. Os excertos relevantes não alteram a natureza de índice da página.",
+      "quote": "Em outubro, a Amazônia teve aumento de 22% no desmatamento, enquanto o Cerrado registrou queda de 57%"
+    },
+    {
+      "id": "S6",
+      "kind": "producer_publication",
+      "reason": "Publicação que apresenta a divulgação de estimativas e mapeamentos pelo próprio INPE e encaminha às notas técnicas e aos dados. O contexto de anúncio governamental não constitui validação das afirmações. Há uma aparente inconsistência na data de divulgação escrita como 2014, enquanto o período descrito termina em 2024; isso não altera o tipo documental.",
+      "quote": "O Instituto Nacional de Pesquisas Espaciais (INPE), divulgou em 06/11/2014 a estimativa da taxa de desmatamento na Amazônia Legal Brasileira (ALB)."
+    },
+    {
+      "id": "S7",
+      "kind": "producer_publication",
+      "reason": "Publicação do INPE sobre resultados do Prodes, cuja produção e responsabilidade são explicitadas no corpo. Trata principalmente do período de agosto de 2024 a julho de 2025, usando 2024 como comparação; não equivale a uma análise do ano civil de 2024. A classificação não endossa as avaliações institucionais presentes no texto.",
+      "quote": "Desde 1988, o INPE realiza o mapeamento sistemático da Amazônia Legal e produz as taxas anuais de desmatamento."
+    },
+    {
+      "id": "S8",
+      "kind": "index_or_other",
+      "reason": "O conteúdo fornecido é uma ficha de acervo com metadados e resumo de um relatório, não o relatório em si nem uma reportagem. A indicação do ISA como editora não basta para tratar esta página como a publicação analítica completa; a classificação limita-se à ficha disponibilizada.",
+      "quote": "Tamanho: 53.28 MB | Formato: PDF"
+    }
+  ]
+}
