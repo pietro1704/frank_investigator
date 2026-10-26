@@ -9,6 +9,12 @@
 #     priority: 2
 #     schedule: at 5am every day
 
+development:
+  recover_topic_research: &recover_topic_research
+    class: Investigations::RecoverTopicResearchJob
+    queue: default
+    schedule: every 5 minutes
+
 production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
@@ -46,6 +52,7 @@ production:
     class: Investigations::RecoverExpiredGroupLeasesJob
     queue: default
     schedule: every 5 minutes
+  recover_topic_research: *recover_topic_research
   purge_stale_broadcasts:
     command: "QueueMaintenance::PurgeStaleBroadcasts.call"
     schedule: every 5 minutes

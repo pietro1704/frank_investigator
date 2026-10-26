@@ -44,12 +44,15 @@ pt-BR:
       opensource_body_html: 'O código-fonte completo do Frank Investigator está publicamente disponível sob a <a href="https://github.com/akitaonrails/frank_investigator" target="_blank" rel="noopener" class="underline hover:text-ink">Licença Pública Geral Affero GNU v3.0</a>. Qualquer pessoa pode inspecionar, auditar, reproduzir ou melhorar a metodologia de análise.'
 
     methodology:
+      topics_heading: "Investigação por assunto"
+      topics_body: "Uma pergunta em linguagem natural inicia uma pesquisa nova: o Frank lê uma amostra de notícias, verifica a pertinência e o período de referência e busca registros e dados originais. O relatório resumido verifica a afirmação central de cada matéria selecionada; ele não executa todos os analisadores do relatório completo por URL. A busca limitada lê até seis candidatos iniciais e quatro candidatos adicionais de evidência, distribuídos entre as consultas. Fontes que não puderam ser lidas e textos recortados permanecem como limitações explícitas."
+      topics_verdicts: "Veredito factual e qualidade editorial são avaliações diferentes. Correta ou incorreta se refere ao ponto citado e verificado, não a todas as frases da matéria. Leia os trechos de evidência e seus recortes. Repetição e autocitação não comprovam fatos; contradições originais impedem confirmação definitiva, opinião não é verificável como fato e falta de evidência original permanece insuficiente, não falsa. Uma publicação do produtor só é primária para os dados ou registros que ele efetivamente produz. Andamento não é avaliação concluída; tentativas canceladas ou falhas não publicam um relatório factual final."
       questions_heading: "Perguntas e sugestões de leitura"
       title: "Metodologia — Frank Investigator"
       heading: "Como ler um relatório"
       link_text: "Como ler um relatório"
       overview_heading: "Visão geral"
-      overview_body: "Cada investigação executa um pipeline automatizado de 15 etapas que busca o artigo, extrai alegações factuais, procura evidências e aplica múltiplas camadas de análise. O relatório apresenta os achados do mais importante (topo) ao mais detalhado (base). Nenhuma pontuação isolada conta a história completa — leia o relatório por inteiro."
+      overview_body: "A investigação completa de uma URL executa um pipeline automatizado de 15 etapas que busca o artigo, extrai alegações factuais, procura evidências e aplica múltiplas camadas de análise. O relatório apresenta os achados do mais importante (topo) ao mais detalhado (base). Nenhuma pontuação isolada conta a história completa — leia o relatório por inteiro."
       top_scores_heading: "Pontuações principais"
       credibility_heading: "Credibilidade"
       credibility_body: "Pontuação composta (0-100%) derivada de TODOS os sinais de análise. Combina o pior achado (60% de peso) com a média dos achados significativos (40% de peso). Um único problema grave (ex.: alta coordenação) reduz a credibilidade mesmo que outras pontuações estejam limpas. Imperfeições menores abaixo do limiar de ruído (25%) são ignoradas — todo artigo tem algumas."
@@ -117,8 +120,8 @@ pt-BR:
     home:
       title: "Frank Investigator"
       eyebrow: "Frank Investigator"
-      heading: "Investigue uma notícia por meio de alegações, fontes vinculadas e lacunas de evidência."
-      hero_copy: "Envie a URL de um artigo público. O Frank Investigator vai normalizar, buscar o artigo, catalogar citações no corpo do texto, extrair alegações canônicas e separar o que é verificável do que ainda precisa de evidência."
+      heading: "Investigue um assunto ou uma notícia."
+      hero_copy: "Pergunte em linguagem natural para buscar e verificar notícias, ou envie a URL de uma matéria para uma análise completa."
       main_story_label: "Notícia principal"
       main_story_help: "Obrigatório. Comece pelo artigo que você quer investigar."
       main_story_placeholder: "https://veiculo.exemplo/noticia"

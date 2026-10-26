@@ -28,6 +28,13 @@ Rails.application.routes.draw do
   get "methodology" => "pages#methodology", as: :methodology
   get "questions" => "questions#show", as: :question_search
 
+  resources :topic_investigations, only: [ :new, :create, :show ] do
+    member do
+      post :cancel
+      post :restart
+    end
+  end
+
   # Submission form — basic auth via FRANK_AUTH_SECRET
   post "/", to: "investigations#create", as: :submit_investigation
   root "investigations#home"

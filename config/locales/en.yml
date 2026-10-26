@@ -44,12 +44,15 @@ en:
       opensource_body_html: 'The complete source code of Frank Investigator is publicly available under the <a href="https://github.com/akitaonrails/frank_investigator" target="_blank" rel="noopener" class="underline hover:text-ink">GNU Affero General Public License v3.0</a>. Anyone may inspect, audit, reproduce, or improve the analysis methodology.'
 
     methodology:
+      topics_heading: "Investigating a topic"
+      topics_body: "A natural-language question starts new research: Frank reads a sample of news articles, checks their relevance and reference period, and searches for original records and data. The brief report checks the central assertion of each selected article; it does not run all of the full URL report's analyzers. The bounded search reads up to six initial candidates and four additional evidence candidates, distributed across search queries. Sources that cannot be read and truncated texts remain explicit limitations."
+      topics_verdicts: "Factual verdicts and editorial quality are different. Correct or incorrect refers to the point quoted and checked, not every sentence of an article. Read the evidence excerpts and their scope. Repetition and self-citation do not establish truth; original contradictions prevent definitive support, opinion is not factually checkable, and missing original evidence remains insufficient rather than false. A producer publication is only primary for the specific data or record it actually produces. Progress is not a completed assessment; cancelled or failed attempts publish no final factual report."
       questions_heading: "Questions and reading recommendations"
       title: "Methodology — Frank Investigator"
       heading: "How to read a report"
       link_text: "How to read a report"
       overview_heading: "Overview"
-      overview_body: "Each investigation runs a 15-step automated pipeline that fetches the article, extracts factual claims, searches for evidence, and applies multiple analysis layers. The report presents findings from most important (top) to most detailed (bottom). No single score tells the full story — read the report as a whole."
+      overview_body: "A full news-URL investigation runs a 15-step automated pipeline that fetches the article, extracts factual claims, searches for evidence, and applies multiple analysis layers. The report presents findings from most important (top) to most detailed (bottom). No single score tells the full story — read the report as a whole."
       top_scores_heading: "Top-level scores"
       credibility_heading: "Credibility"
       credibility_body: "A composite score (0-100%) derived from ALL analysis signals. It blends the worst finding (60% weight) with the average of significant findings (40% weight). A single severe issue (e.g., high coordination) drags credibility down even if other scores are clean. Minor imperfections below the noise threshold (25%) are ignored — every article has some."
@@ -117,8 +120,8 @@ en:
     home:
       title: "Frank Investigator"
       eyebrow: "Frank Investigator"
-      heading: "Investigate a news article through claims, linked sources, and evidence gaps."
-      hero_copy: "Submit a public article URL. Frank Investigator will normalize it, fetch the article, catalog in-body citations, extract canonical claims, and separate what is checkable from what still needs evidence."
+      heading: "Investigate a topic or a news article."
+      hero_copy: "Ask in natural language to find and check news, or submit an article URL for a full investigation."
       main_story_label: "Main news story"
       main_story_help: "Required. Start with the article you want to investigate."
       main_story_placeholder: "https://newsroom.example/story"

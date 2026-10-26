@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_17_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_26_230000) do
   create_table "article_claims", force: :cascade do |t|
     t.integer "article_id", null: false
     t.integer "claim_id", null: false
@@ -509,6 +509,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_17_000000) do
     t.index ["expires_at"], name: "index_solid_queue_semaphores_on_expires_at"
     t.index ["key", "value"], name: "index_solid_queue_semaphores_on_key_and_value"
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
+  end
+
+  create_table "topic_investigations", force: :cascade do |t|
+    t.text "question", null: false
+    t.string "slug", null: false
+    t.string "run_token", null: false
+    t.string "status", default: "queued", null: false
+    t.string "stage", default: "queued", null: false
+    t.string "lease_token"
+    t.datetime "lease_expires_at"
+    t.json "discovery", default: {}, null: false
+    t.json "report", default: {}, null: false
+    t.string "error_code"
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["run_token"], name: "index_topic_investigations_on_run_token", unique: true
+    t.index ["slug"], name: "index_topic_investigations_on_slug", unique: true
+    t.index ["status", "lease_expires_at"], name: "index_topic_investigations_on_status_and_lease_expires_at"
   end
 
   create_table "verdict_snapshots", force: :cascade do |t|
