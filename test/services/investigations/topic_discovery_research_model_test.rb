@@ -54,6 +54,15 @@ class Investigations::TopicDiscoveryResearchModelTest < ActiveSupport::TestCase
     assert_not_requested :post, "https://api.openai.com/v1/chat/completions"
   end
 
+  test "accepts the live captured structured requirements without dropping ambiguity" do
+    @payloads["topic_research_plan"] = fixture("structured_plan")
+    result = Investigations::TopicPlan.call(@client.plan(question: "Escolas brasileiras e universidades mundiais"))
+    assert_equal 2, result["version"]
+    assert_equal 2, result.dig("requirements", "editorial_counts", "left")
+    assert_equal "", result.dig("requirements", "reference_period")
+    assert_equal 8, result.dig("requirements", "ambiguities").size
+  end
+
   test "unavailable configured provider fails without attempting another provider" do
     ENV.delete("OPENROUTER_API_KEY")
     assert_raises(Investigations::TopicDiscovery::Unavailable) { @client.plan(question: "Vacinas infantis") }

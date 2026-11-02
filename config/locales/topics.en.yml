@@ -1,5 +1,11 @@
 en:
   topics:
+    research_plan: "Research scope"
+    requested_side: "%{side}: %{count} requested articles"
+    sides:
+      left: "Left"
+      center: "Center"
+      right: "Right"
     heading: "Investigate a topic"
     home: "Back to Frank"
     new_search: "Investigate another topic"

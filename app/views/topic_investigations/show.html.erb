@@ -5,6 +5,18 @@
   <p class="mb-6 underline"><%= link_to t("topics.new_search"), new_topic_investigation_path %></p>
   <h1 class="font-serif text-3xl font-bold mb-4"><%= @topic.question %></h1>
   <p class="text-muted mb-4"><%= t("topics.brief_scope") %></p>
+  <% if (plan = @topic.discovery["plan"]).present? %>
+    <details class="mb-4" data-research-plan>
+      <summary><%= t("topics.research_plan") %></summary>
+      <p><%= plan["scope"] %></p>
+      <% requirements = plan.fetch("requirements", {}) %>
+      <ul class="list-disc pl-5"><% Array(requirements["subquestions"]).each do |question| %><li><%= question %></li><% end %></ul>
+      <ul class="list-disc pl-5"><% Array(requirements["ambiguities"]).each do |ambiguity| %><li><%= ambiguity %></li><% end %></ul>
+      <% requirements.fetch("editorial_counts", {}).each do |side, count| %>
+        <% if count.to_i.positive? %><p><%= t("topics.requested_side", side: t("topics.sides.#{side}"), count: count) %></p><% end %>
+      <% end %>
+    </details>
+  <% end %>
   <% if @notice %><p role="alert" class="mb-4"><%= @notice %></p><% end %>
   <% if active %>
     <section role="status" class="border border-line rounded-2xl p-5">

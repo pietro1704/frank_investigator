@@ -1,0 +1,41 @@
+{
+  "scope": "Investigar, sem presumir a resposta, a alegação de que a esquerda domina as escolas brasileiras e as universidades em âmbito mundial. Distinguir os dois segmentos educacionais, confrontar evidências favoráveis e contrárias e buscar seis notícias individuais: duas de direita, duas de centro e duas de esquerda. O período não foi especificado.",
+  "news_queries": [
+    "\"escolas brasileiras\" esquerda \"dominação\" doutrinação pluralismo notícias veículos direita centro esquerda",
+    "\"universidades\" \"mundo\" esquerda predominância ideológica diversidade política notícias veículos direita centro esquerda"
+  ],
+  "evidence_queries": [
+    "escolas Brasil orientação política professores currículo práticas pedagógicas pesquisas dados originais evidências doutrinação pluralismo",
+    "universidades mundo orientação política docentes governança liberdade acadêmica pesquisas comparativas dados originais predominância esquerda diversidade ideológica"
+  ],
+  "requirements": {
+    "subquestions": [
+      "Quais definições e indicadores permitem avaliar a expressão “a esquerda domina”, distinguindo orientação política de docentes, conteúdos curriculares, governança e práticas institucionais?",
+      "Que dados originais sustentam ou contestam essa alegação nas escolas brasileiras, e quais são seus limites de representatividade?",
+      "Que dados originais sustentam ou contestam essa alegação nas universidades em âmbito mundial, considerando diferenças entre países e instituições?",
+      "As evidências distinguem predominância de opiniões políticas, influência institucional e imposição ideológica?",
+      "Como duas notícias de direita, duas de centro e duas de esquerda abordam a questão, e quais evidências apresentam?",
+      "Quais critérios transparentes permitem classificar a orientação editorial das fontes, preservando casos controversos ou incertos?"
+    ],
+    "territories": [
+      "Brasil — escolas",
+      "Âmbito mundial — universidades, sem restrição a um único país"
+    ],
+    "reference_period": "",
+    "ambiguities": [
+      "Não há período de referência nem intervalo de publicação das notícias especificado.",
+      "“Domina” não tem definição operacional, métrica ou limiar de predominância indicado.",
+      "“Esquerda” não está definida e pode designar posições distintas conforme o país e o contexto.",
+      "Não foi indicada uma base de comparação para avaliar predominância ou desproporção ideológica.",
+      "Não foram especificados níveis escolares, redes públicas ou privadas, tipos de universidade, áreas acadêmicas ou grupos institucionais a avaliar.",
+      "O recorte mundial das universidades não especifica países nem método de amostragem; conclusões globais exigem evidências geograficamente diversas.",
+      "Não está definido se a classificação direita, centro e esquerda deve se aplicar aos veículos, aos autores ou ao enquadramento de cada notícia.",
+      "Não foi especificado como distribuir as seis notícias entre escolas brasileiras e universidades mundiais."
+    ],
+    "editorial_counts": {
+      "left": 2,
+      "center": 2,
+      "right": 2
+    }
+  }
+}
