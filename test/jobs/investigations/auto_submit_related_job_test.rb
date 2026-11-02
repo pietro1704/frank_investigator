@@ -20,6 +20,13 @@ class Investigations::AutoSubmitRelatedJobTest < ActiveJob::TestCase
     )
   end
 
+  test "topic-managed parents do not start unrequested related investigations" do
+    @parent.update!(auto_submit_limit: 0, coordinated_narrative: { "similar_coverage" => [ { "url" => "https://outlet-a.com/story" } ] })
+    assert_no_difference "Investigation.count" do
+      Investigations::AutoSubmitRelatedJob.perform_now(@parent.id)
+    end
+  end
+
   test "submits up to the configured cap with one investigation per outlet" do
     coverage = [
       { "url" => "https://outlet-a.com/story-1", "title" => "A1", "snippet" => "" },

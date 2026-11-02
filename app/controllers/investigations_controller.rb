@@ -166,6 +166,7 @@ class InvestigationsController < ApplicationController
       slug: @investigation.slug,
       url: @investigation.normalized_url,
       status: @investigation.status,
+      auto_submit_limit: @investigation.auto_submit_limit,
       **readiness_json,
       report_url: investigation_url(@investigation),
       checkability_status: @investigation.checkability_status,

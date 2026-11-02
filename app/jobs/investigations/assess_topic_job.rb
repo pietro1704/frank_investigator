@@ -5,6 +5,7 @@ module Investigations
     def perform(topic_id, run_token)
       topic = TopicInvestigation.find_by(id: topic_id)
       return unless topic
+      return if topic.full_analysis_required? && !topic.discovery["analysis_phase_complete"]
       token = topic.claim_assessment!(run_token:)
       return unless token
       result = TopicAssessment.call(discovery: topic.discovery,

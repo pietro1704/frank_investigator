@@ -27,7 +27,7 @@ module Investigations
       coverage = Array(investigation.coordinated_narrative&.dig("similar_coverage"))
       return if coverage.empty?
 
-      cap = self.class.max_auto_submissions
+      cap = investigation.auto_submit_limit || self.class.max_auto_submissions
       return if cap <= 0
 
       submitted = 0

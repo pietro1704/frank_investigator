@@ -1,5 +1,7 @@
 en:
   topics:
+    full_scope: "Research with full article analyses and a source-grounded consolidated assessment. Missing analyses and evidence remain explicit limitations."
+    full_report: "Read full article analysis"
     research_plan: "Research scope"
     requested_side: "%{side}: %{count} requested articles"
     sides:
@@ -41,6 +43,8 @@ en:
       disputes: "Disputes the checked assertion"
       context: "Adds context; does not establish the assertion alone"
     states:
+      awaiting_analyses: "Awaiting full article analyses"
+      monitoring_analyses: "Checking full article analyses"
       queued: "Waiting to start"
       researching: "Researching sources"
       awaiting_assessment: "Sources collected; waiting for assessment"
@@ -58,6 +62,10 @@ en:
       reading_evidence: "Reading evidence sources"
       classifying: "Identifying news and original publications"
     errors:
+      analysis_submission_failed: "Could not submit all full analyses. Retry explicitly to start a new research run."
+      analysis_monitoring_failed: "Full-analysis progress could not be validated. No final report was published."
+      analyses_failed: "No current full article analysis became available. This does not confirm or refute the question."
+      analysis_incomplete: "The full article analysis failed, expired or could not be validated; this point remains insufficiently verified."
       research_budget_exceeded: "The configured research time budget was reached. Read sources remain recorded; retry explicitly to start a new run."
       search_unavailable: "The search service failed or blocked access. This is not a finding that no relevant news exists."
       enqueue_failed: "The queue is temporarily unavailable. Delivery will be attempted again."

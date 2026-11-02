@@ -2,9 +2,10 @@ module Investigations
   # Per-run links share full URL investigations without changing their groups.
   # EnsureStarted retains the existing durable, post-commit kickoff delivery.
   class LinkTopicAnalyses
-    def self.call(topic:, run_token:, starter: EnsureStarted)
+    def self.call(topic:, run_token:, starter: EnsureStarted, lease_token: nil)
       topic.with_lock do
-        return [] unless topic.run_token == run_token && topic.awaiting_assessment?
+        return [] unless topic.run_token == run_token && (topic.awaiting_assessment? ||
+          (lease_token.present? && topic.execution_current?(run_token:, lease_token:, phase: "assessing")))
         discovery = topic.discovery
         ids = discovery["news_ids"]
         documents = Array(discovery["documents"])
@@ -19,7 +20,7 @@ module Investigations
         end
         sources.each do |id, url|
           next if topic.topic_analysis_links.for_run(run_token).exists?(source_id: id)
-          investigation = starter.call(submitted_url: url)
+          investigation = starter.call(submitted_url: url, auto_submit_limit: 0)
           topic.topic_analysis_links.create!(run_token:, source_id: id, source_url: url, investigation:)
         end
         topic.topic_analysis_links.for_run(run_token).order(:id).to_a

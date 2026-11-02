@@ -61,6 +61,7 @@ class Investigations::LinkTopicAnalysesTest < ActiveSupport::TestCase
     assert_equal existing.id, @topic.topic_analysis_links.find_by!(source_id: source["id"]).investigation_id
     assert_equal existing.id, other.topic_analysis_links.find_by!(source_id: source["id"]).investigation_id
     assert_predicate existing.reload, :completed?
+    assert_nil existing.reload.auto_submit_limit
     assert_equal group.id, existing.reload.investigation_group_id
     assert_equal existing.id, group.reload.main_investigation_id
     @topic.cancel!

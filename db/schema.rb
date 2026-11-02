@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_220000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_221000) do
   create_table "article_claims", force: :cascade do |t|
     t.integer "article_id", null: false
     t.integer "claim_id", null: false
@@ -315,6 +315,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_220000) do
     t.text "summary"
     t.json "temporal_manipulation"
     t.datetime "updated_at", null: false
+    t.integer "auto_submit_limit"
     t.index ["auto_submitted_from_id"], name: "index_investigations_on_auto_submitted_from_id"
     t.index ["checkability_status"], name: "index_investigations_on_checkability_status"
     t.index ["investigation_group_id"], name: "index_investigations_on_investigation_group_id"

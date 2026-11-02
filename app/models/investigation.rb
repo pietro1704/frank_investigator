@@ -44,6 +44,8 @@ class Investigation < ApplicationRecord
 
   enum :group_membership_kind, { manual: "manual", auto: "auto" }, prefix: true, validate: { allow_nil: true }
 
+  validates :auto_submit_limit, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 5 }, allow_nil: true
+
   validates :submitted_url, :normalized_url, presence: true
   validates :normalized_url, uniqueness: true
   validate :group_membership_is_complete
