@@ -54,8 +54,7 @@ module Investigations
       return no_news if documents.empty?
 
       progress("screening")
-      screen = @model.screen(question: @question, scope: @result.fetch("scope"), documents: documents.deep_dup)
-      validate_screen!(screen)
+      screen = screen_documents!
       @result["screen"] = screen
       relevant_ids = screen.fetch("reviews").select { |review| review.fetch("relevant") }.pluck("id")
       return no_news if relevant_ids.empty?
@@ -91,8 +90,7 @@ module Investigations
         read(batch, role: "news", limit: 6)
         next if documents.empty?
         progress("screening")
-        screen = @model.screen(question: @question, scope: @result.fetch("scope"), documents: documents.deep_dup)
-        validate_screen!(screen)
+        screen = screen_documents!
         @result["screen"] = screen
         relevant_ids = screen.fetch("reviews").select { |item| item.fetch("relevant") }.pluck("id")
         classify_documents!
@@ -109,6 +107,18 @@ module Investigations
       @result["status"] = @result.fetch("news_ids").any? ? "discovered" : "no_news"
       progress("classifying")
       @result
+    end
+
+    def screen_documents!
+      check_cancelled!
+      screen = @model.screen(question: @question, scope: @result.fetch("scope"), documents: documents.deep_dup)
+      validate_screen!(screen)
+      screen
+    rescue InvalidResponse
+      raise if @result.fetch("screening_retries", 0) >= 1
+      @result["screening_retries"] = 1
+      progress("screening")
+      retry
     end
 
     def classify_documents!
