@@ -2,6 +2,8 @@ class TopicInvestigation < ApplicationRecord
   class InvalidDiscovery < StandardError; end
   class InvalidReport < StandardError; end
 
+  has_many :topic_analysis_links, dependent: :delete_all
+
   LEASE_FOR = 5.minutes
   ACTIVE_STATUSES = %w[queued researching awaiting_assessment assessing].freeze
   DISCOVERY_STAGES = %w[planning searching_news reading_news screening searching_evidence reading_evidence classifying].freeze
