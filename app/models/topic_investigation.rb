@@ -76,6 +76,11 @@ class TopicInvestigation < ApplicationRecord
       lease_token: nil, lease_expires_at: nil, finished_at: Time.current, updated_at: Time.current) == 1
   end
 
+  def checkpoint_assessment!(run_token:, lease_token:, stage:)
+    raise InvalidReport unless stage.in?(%w[assessing synthesizing])
+    execution_scope(run_token:, lease_token:, phase: "assessing").update_all(stage:, lease_expires_at: LEASE_FOR.from_now, updated_at: Time.current) == 1
+  end
+
   def full_analysis_required?
     discovery.dig("plan", "version").to_i >= 2
   end

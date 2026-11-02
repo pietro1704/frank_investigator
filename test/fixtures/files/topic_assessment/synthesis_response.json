@@ -1,0 +1,83 @@
+{
+  "question": "O desmatamento na Amazônia caiu em 2024?",
+  "limitations": [
+    "A pergunta não delimita o território amazônico, o indicador, a base de comparação nem se 2024 corresponde ao ano civil ou a um ciclo de monitoramento.",
+    "Não foram fornecidos os boletins completos do SAD, as notas técnicas do Prodes, a análise metodológica completa do ORA nem o relatório original do MapBiomas. Não há análises completas adicionais no campo full_analyses.",
+    "As reportagens e as avaliações fornecidas foram tratadas como contexto, não como medições originais ou votos independentes sobre a conclusão.",
+    "Nenhum documento foi marcado como truncado, mas há conteúdo incompleto ou limitado: S1 contém uma mensagem de erro, S2 termina em “Ops!”, S5 é uma página de chamadas e S8 apresenta metadados e resumo, não o relatório de 44 páginas."
+  ],
+  "sections": [
+    {
+      "question_id": "Q1",
+      "verdict": "needs_more_evidence",
+      "conclusion": "Depende do território e do sistema de medição. O Imazon informa queda de 7% no desmatamento detectado pelo SAD entre janeiro e dezembro de 2024, comparado ao mesmo período de 2023: de 4.030 para 3.739 km². A reportagem fornecida situa esse resultado na Amazônia Legal brasileira. Entretanto, a OTCA apresenta resultado de sentido oposto para seu recorte amazônico de oito países: aumento de 256% em 2024 frente a 2023, segundo processamento do ORA. Esses resultados não constituem necessariamente contradição sobre a mesma área ou metodologia, mas impedem generalizar a queda brasileira para toda a Amazônia. Como a pergunta não define território, indicador e período de comparação, não há base para responder simplesmente “sim”.",
+      "limitations": [
+        "A delimitação da Amazônia Legal para o resultado do SAD aparece explicitamente em S2, uma reportagem; o trecho original de S1 não define integralmente a cobertura territorial do sistema.",
+        "O recorte de oito países da OTCA é mais amplo que o brasileiro, mas não deve ser automaticamente identificado com qualquer definição possível de toda a Amazônia.",
+        "Os documentos não permitem harmonizar as delimitações florestais, os critérios de detecção e os calendários do SAD, do ORA e do Prodes.",
+        "A publicação do INPE em S6 apresenta uma estimativa para agosto de 2023 a julho de 2024, mas não fornece no corpo uma taxa anterior que permita verificar a queda nesse sistema.",
+        "S6 informa 6.288 km² como estimativa de 2024, enquanto S7 apresenta 6.518 km² como referência de 2024 ao divulgar a taxa consolidada de 2025. Sem as notas técnicas, não é possível reconciliar completamente os valores; a comparação de S7 é de 2025 contra 2024, não de 2024 contra 2023.",
+        "S6 registra a data de divulgação como 06/11/2014, apesar de descrever o ciclo de 2023–2024; essa inconsistência textual não foi corrigida por suposição.",
+        "Desmatamento e degradação são indicadores distintos. Uma queda do primeiro não demonstra redução do conjunto dos danos florestais."
+      ],
+      "evidence": [
+        {
+          "source_id": "S1",
+          "quote": "De janeiro a dezembro, foram derrubados 3.739 km², 7% a menos do que no mesmo período de 2023, quando a devastação atingiu 4.030 km².",
+          "scope_quote": "A floresta amazônica teve em 2024 o segundo ano consecutivo de queda no desmatamento, após uma sequência de cinco anos com recordes negativos de destruição. De janeiro a dezembro, foram derrubados 3.739 km², 7% a menos do que no mesmo período de 2023, quando a devastação atingiu 4.030 km².",
+          "scope_reason": "Mede área de floresta desmatada e compara explicitamente os anos civis de 2024 e 2023. O corpo chama o território de floresta amazônica, sem explicitar seus limites; S2 identifica o resultado como referente à Amazônia Legal. Portanto, sustenta uma queda no recorte monitorado, não uma conclusão territorial irrestrita.",
+          "primary_reason": "O Imazon apresenta resultados do SAD, sistema de monitoramento por imagens de satélite que o próprio instituto opera. A publicação informa os totais anuais produzidos por esse monitoramento e sua comparação, embora os boletins e os procedimentos completos não estejam disponíveis no material fornecido.",
+          "relationship": "supports",
+          "scope_match": {
+            "population": true,
+            "territory": false,
+            "period": true,
+            "metric": true
+          }
+        },
+        {
+          "source_id": "S2",
+          "quote": "Já em relação ao desmatamento, no ano passado, 3.739 km² de floresta foram derrubados na Amazônia Legal, menos do que os 4.030 km² registrados em 2023. Isso é uma redução de 7%.",
+          "scope_quote": "A Amazônia Legal encerrou 2024 com uma redução de 7% no desmatamento, mas a degradação ambiental aumentou 497%, puxada principalmente pelas queimadas de agosto e setembro do ano passado.",
+          "scope_reason": "A reportagem explicita o recorte brasileiro da Amazônia Legal e o ano de 2024, ajudando a interpretar a abrangência atribuída aos números do SAD. Não cobre toda a Amazônia e não é uma medição independente da publicada pelo Imazon.",
+          "primary_reason": "",
+          "relationship": "context",
+          "scope_match": {
+            "population": true,
+            "territory": false,
+            "period": true,
+            "metric": true
+          }
+        },
+        {
+          "source_id": "S3",
+          "quote": "O desmatamento cresceu 256% e a degradação 64% em 2024, em relação a 2023. Em 2024 o desmatamento saiu de 10.391 km², em 2023, para 37.033 km² e a degradação passou de 16.709 km² para 27.349 km2, segundo os dados processados pelo ORA.",
+          "scope_quote": "A área de floresta impactada por desmatamento e degradação na Amazônia caiu cerca de 60% entre 2024 e 2025, considerando os oito países membros da OTCA. Em 2025, foram registrados pouco mais de 25 mil km² afetados, frente aos aproximadamente 64 mil km² observados no ano anterior. Os dados foram processados pelo Observatório Regional Amazônico (ORA) da OTCA com base em informações do programa europeu Copernicus, por meio do Joint Research Centre (JRC), e estão disponíveis em mapas e gráficos na plataforma do ORA.",
+          "scope_reason": "O trecho de escopo situa a série nos oito países membros da OTCA e identifica sua origem. A passagem principal separa desmatamento de degradação e compara 2024 com 2023, mostrando aumento do primeiro. As datas exatas de fechamento anual e os limites cartográficos não são apresentados. Esse resultado contesta uma generalização da queda à Amazônia internacional, sem refutar diretamente o SAD no recorte brasileiro.",
+          "primary_reason": "A OTCA divulga uma agregação produzida por seu Observatório Regional Amazônico mediante processamento de informações Copernicus/JRC. O aumento de 2024 é apresentado como resultado desse processamento, e não apenas como alegação de um entrevistado; os mapas e a análise técnica completa, porém, não foram fornecidos.",
+          "relationship": "disputes",
+          "scope_match": {
+            "population": true,
+            "territory": false,
+            "period": true,
+            "metric": true
+          }
+        },
+        {
+          "source_id": "S6",
+          "quote": "O valor estimado do desmatamento no período de 01 de agosto de 2023 a 31 de julho de 2024 foi de 6.288 km².",
+          "scope_quote": "O Instituto Nacional de Pesquisas Espaciais (INPE), divulgou em 06/11/2014 a estimativa da taxa de desmatamento na Amazônia Legal Brasileira (ALB). O valor estimado do desmatamento no período de 01 de agosto de 2023 a 31 de julho de 2024 foi de 6.288 km².",
+          "scope_reason": "Apresenta área estimada de desmatamento na Amazônia Legal brasileira para um ciclo que atravessa 2023 e 2024, não para janeiro a dezembro de 2024. Como a pergunta não define o calendário, essa correspondência permanece incerta. Não há valor comparativo anterior no corpo, e a data de divulgação apresenta inconsistência.",
+          "primary_reason": "O INPE divulga uma estimativa de seu próprio monitoramento, identificando a área calculada e o intervalo de medição. Isso documenta o resultado estimado desse ciclo, mas não demonstra uma queda sem a taxa comparável anterior e sem a nota técnica mencionada.",
+          "relationship": "context",
+          "scope_match": {
+            "population": true,
+            "territory": false,
+            "period": false,
+            "metric": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -22,6 +22,25 @@ class Investigations::AssessTopicJobTest < ActiveJob::TestCase
     assert_nil @topic.lease_token
   end
 
+  test "structured assessment runs the grounded synthesis before publishing" do
+    discovery = @topic.discovery.deep_dup
+    discovery["plan"] = { "version" => 2, "requirements" => { "subquestions" => [] } }
+    discovery["analysis_phase_complete"] = true
+    discovery["full_analyses"] = discovery.fetch("news_ids").map { |id| { "source_id" => id, "status" => "ready", "slug" => "report" } }
+    @topic.update!(discovery:)
+    raw = JSON.parse(File.read(Rails.root.join("test/fixtures/files/topic_assessment/synthesis_response.json")))
+    klass = Investigations::TopicSynthesis::ResearchModel
+    original = klass.instance_method(:synthesize)
+    klass.define_method(:synthesize) { |input:| raw.deep_dup }
+    with_assessment(->(**) { @report }) { perform }
+    assert_predicate @topic.reload, :completed?
+    assert_equal [ "Q1" ], @topic.report.fetch("sections").pluck("question_id")
+    assert_equal @topic.question, @topic.report.fetch("sections").sole.fetch("question")
+    assert @topic.report.fetch("synthesis_sources").any?
+  ensure
+    klass.define_method(:synthesize, original) if original
+  end
+
   test "foreign generations missing rows and wrong phases do not invoke a model" do
     with_assessment(->(**) { @report }) do
       Investigations::AssessTopicJob.perform_now(@topic.id, "foreign")

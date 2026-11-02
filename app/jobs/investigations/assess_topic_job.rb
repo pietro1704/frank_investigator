@@ -10,6 +10,11 @@ module Investigations
       return unless token
       result = TopicAssessment.call(discovery: topic.discovery,
         cancelled: -> { !topic.execution_current?(run_token:, lease_token: token, phase: "assessing") })
+      if topic.full_analysis_required?
+        return unless topic.checkpoint_assessment!(run_token:, lease_token: token, stage: "synthesizing")
+        result = TopicSynthesis.call(discovery: topic.discovery, report: result,
+          cancelled: -> { !topic.execution_current?(run_token:, lease_token: token, phase: "assessing") })
+      end
       topic.finish_assessment!(run_token:, lease_token: token, report: result)
     rescue TopicDiscovery::Cancelled
       topic.fail_execution!(run_token:, lease_token: token, code: "interrupted", phase: "assessing") if topic && token

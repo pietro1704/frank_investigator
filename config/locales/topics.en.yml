@@ -54,6 +54,7 @@ en:
       failed: "The investigation could not be completed."
       cancelled: "Investigation cancelled."
     stages:
+      synthesizing: "Consolidating answers by subquestion"
       planning: "Planning the research"
       searching_news: "Searching for news"
       reading_news: "Reading news articles"
@@ -86,3 +87,6 @@ en:
       insufficient: "There is not enough relevant original evidence to establish whether the central assertion is correct. Repeated coverage or the article citing itself is insufficient."
       conflict: "The original evidence includes a contradiction. A definitive verdict is not warranted; compare the evidence and its scope."
       opinion: "This statement is an evaluative judgment rather than a directly checkable fact."
+
+  topic_synthesis:
+    scope_mismatch: "The available evidence does not match the population, territory, period or metric needed for this conclusion. A narrower finding cannot establish the broader claim."

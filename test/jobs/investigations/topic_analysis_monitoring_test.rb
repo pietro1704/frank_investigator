@@ -82,6 +82,22 @@ class Investigations::TopicAnalysisMonitoringTest < ActiveJob::TestCase
     end
   end
 
+  test "ready snapshots retain evidence actually read by the full URL pipeline" do
+    link = start.first
+    complete(link)
+    claim = Claim.create!(canonical_text: "A measurable survey result", canonical_fingerprint: SecureRandom.hex)
+    assessment = ClaimAssessment.create!(investigation: link.investigation, claim:, verdict: :needs_more_evidence)
+    article = Article.create!(url: "https://original.example.org/data", normalized_url: "https://original.example.org/data", host: "original.example.org",
+      title: "Original survey", body_text: "The original producer describes the population and reference period of its survey.",
+      fetch_status: :fetched, fetched_at: Time.current, authority_tier: :primary)
+    EvidenceItem.create!(claim_assessment: assessment, article:, source_url: article.url)
+    snapshot = Investigations::TopicAnalysisSnapshot.call(link.reload)
+    source = snapshot.fetch("evidence_documents").sole
+    assert_equal article.body_text, source["body"]
+    assert_equal "producer_publication", source["kind"]
+    assert_equal "A#{article.id}", source["id"]
+  end
+
   test "snapshot refuses a report belonging to another source identity" do
     links = start
     foreign = Investigations::EnsureStarted.call(submitted_url: "https://different.example.org/article")

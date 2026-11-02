@@ -16,9 +16,20 @@ module Investigations
       claims = investigation.claim_assessments.includes(:claim).order(:id).limit(21).to_a
       base.merge("status" => "ready", "analyzed_at" => investigation.analysis_completed_at.iso8601,
         "conclusion" => investigation.llm_summary&.dig("conclusion").presence || investigation.summary,
-        "editorial_summary" => investigation.llm_summary || {}, "claims_truncated" => claims.size > 20,
+        "editorial_summary" => investigation.llm_summary || {}, "evidence_documents" => evidence_documents(investigation), "claims_truncated" => claims.size > 20,
         "claims" => claims.first(20).map { |item| { "text" => item.claim.canonical_text, "verdict" => item.verdict,
           "reason" => item.reason_summary.to_s.first(1000), "checkability" => item.checkability_status } })
     end
+
+    def self.evidence_documents(investigation)
+      Article.joins(evidence_items: :claim_assessment).where(claim_assessments: { investigation_id: investigation.id }, fetch_status: "fetched")
+        .distinct.order(:id).limit(4).filter_map do |article|
+        next if article.body_text.blank?
+        { "id" => "A#{article.id}", "url" => article.normalized_url, "title" => article.title.to_s,
+          "body" => article.body_text.first(TopicDiscovery::MAX_BODY_LENGTH), "truncated" => article.body_text.length > TopicDiscovery::MAX_BODY_LENGTH,
+          "kind" => article.primary_source? ? "producer_publication" : "news_article", "fetched_at" => article.fetched_at&.iso8601 }
+      end
+    end
+    private_class_method :evidence_documents
   end
 end
