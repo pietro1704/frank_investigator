@@ -9,6 +9,7 @@ module Investigations
     class Cancelled < StandardError; end
     class Unavailable < StandardError; end
     class SearchUnavailable < StandardError; end
+    class BudgetExceeded < StandardError; end
 
     MAX_QUESTION_LENGTH = 500
     MAX_NEWS_PAGES = 6
@@ -34,6 +35,7 @@ module Investigations
       @model, @searcher, @fetcher = model, searcher, fetcher
       @cancelled, @on_progress = cancelled, on_progress
       @visited = Set.new
+      @deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + ENV.fetch("FRANK_TOPIC_TIMEOUT_SECONDS", 900).to_i.clamp(30, 1800)
       @result = { "question" => @question, "status" => "discovering", "scope" => nil,
         "documents" => [], "failures" => [], "searches" => [], "news_ids" => [], "producer_ids" => [], "excluded_ids" => [] }
     end
@@ -43,6 +45,8 @@ module Investigations
       plan = TopicPlan.call(@model.plan(question: @question))
       validate_plan!(plan)
       @result.merge!("plan" => plan, "scope" => plan.fetch("scope"))
+
+      return structured_discovery(plan) if plan.fetch("version") == 2
 
       progress("searching_news")
       candidates = search(plan.fetch("news_queries"), stage: "searching_news")
@@ -77,12 +81,63 @@ module Investigations
 
     private
 
+    def structured_discovery(plan)
+      progress("searching_news")
+      candidates = search(plan.fetch("news_queries"), stage: "searching_news")
+      attempts = ENV.fetch("FRANK_TOPIC_NEWS_ATTEMPTS", 24).to_i.clamp(6, 24)
+      screen = nil
+      relevant_ids = []
+      candidates.first(attempts).each_slice(6) do |batch|
+        read(batch, role: "news", limit: 6)
+        next if documents.empty?
+        progress("screening")
+        screen = @model.screen(question: @question, scope: @result.fetch("scope"), documents: documents.deep_dup)
+        validate_screen!(screen)
+        @result["screen"] = screen
+        relevant_ids = screen.fetch("reviews").select { |item| item.fetch("relevant") }.pluck("id")
+        classify_documents!
+        select_documents!(relevant_ids, plan)
+        break if @result.dig("selection", "coverage_complete")
+      end
+      return no_news if documents.empty?
+      progress("searching_evidence")
+      queries = (Array(screen&.fetch("evidence_queries")) + plan.fetch("evidence_queries")).uniq.first(4)
+      evidence = search(queries, stage: "searching_evidence")
+      read(evidence, role: "evidence", limit: 8, successful_limit: MAX_EVIDENCE_PAGES)
+      classify_documents!
+      select_documents!(relevant_ids, plan)
+      @result["status"] = @result.fetch("news_ids").any? ? "discovered" : "no_news"
+      progress("classifying")
+      @result
+    end
+
+    def classify_documents!
+      progress("classifying")
+      classification = @model.classify(question: @question, documents: documents.deep_dup)
+      validate_classification!(classification)
+      @result["classification"] = classification
+      by_id = classification.fetch("documents").index_by { |item| item.fetch("id") }
+      documents.each do |document|
+        item = by_id.fetch(document.fetch("id"))
+        document.merge!(item.slice("kind", "editorial_position", "editorial_confidence", "editorial_reason", "editorial_quote"))
+      end
+    end
+
+    def select_documents!(relevant_ids, plan)
+      @result["selection"] = TopicSourceSelection.call(documents:, relevant_ids:,
+        editorial_counts: plan.dig("requirements", "editorial_counts"))
+      @result["news_ids"] = @result.fetch("selection").fetch("news_ids")
+      @result["producer_ids"] = documents.select { |item| item["kind"] == "producer_publication" }.pluck("id")
+      @result["excluded_ids"] = documents.select { |item| item["kind"] == "index_or_other" }.pluck("id")
+    end
+
     def documents
       @result.fetch("documents")
     end
 
     def check_cancelled!
       raise Cancelled if @cancelled.call
+      raise BudgetExceeded if Process.clock_gettime(Process::CLOCK_MONOTONIC) > @deadline
     end
 
     def progress(stage)
@@ -125,13 +180,14 @@ module Investigations
       pages.map(&:size).max.to_i.times.flat_map { |index| pages.filter_map { |page| page[index] } }.uniq(&:url)
     end
 
-    def read(candidates, role:, limit:)
+    def read(candidates, role:, limit:, successful_limit: nil)
       stage = role == "news" ? "reading_news" : "reading_evidence"
       progress(stage)
       attempts = 0
+      initial_size = documents.size
       candidates.each do |candidate|
         check_cancelled!
-        break if attempts >= limit
+        break if attempts >= limit || (successful_limit && documents.size - initial_size >= successful_limit)
         next if @visited.include?(candidate.url)
 
         @visited.add(candidate.url)
@@ -171,15 +227,15 @@ module Investigations
       raise InvalidResponse unless value.is_a?(String) && value.strip.length.between?(min, max)
     end
 
-    def queries!(value, min: 0)
-      raise InvalidResponse unless value.is_a?(Array) && value.size.between?(min, 2)
+    def queries!(value, min: 0, max: 2)
+      raise InvalidResponse unless value.is_a?(Array) && value.size.between?(min, max)
       value.each { |query| text!(query, max: 300) }
     end
 
     def validate_plan!(plan)
       object!(plan, %w[scope news_queries evidence_queries requirements version])
       text!(plan.fetch("scope"), max: 2000)
-      queries!(plan.fetch("news_queries"), min: 1)
+      queries!(plan.fetch("news_queries"), min: 1, max: plan.fetch("version") == 2 ? 8 : 2)
       queries!(plan.fetch("evidence_queries"), min: 1)
       check_cancelled!
     end
@@ -218,7 +274,20 @@ module Investigations
       object!(classification, %w[documents])
       identities!(classification.fetch("documents"))
       classification.fetch("documents").each do |item|
-        object!(item, %w[id kind reason quote])
+        base = %w[id kind reason quote]
+        editorial = %w[editorial_position editorial_confidence editorial_reason editorial_quote]
+        raise InvalidResponse unless [ base.sort, (base + editorial).sort ].include?(item.keys.sort)
+        if item.key?("editorial_position")
+          raise InvalidResponse unless %w[left center right unknown].include?(item["editorial_position"]) &&
+            %w[documented provisional unknown].include?(item["editorial_confidence"])
+          text!(item["editorial_reason"], max: 2000, min: 0)
+          text!(item["editorial_quote"], max: 2000, min: 0)
+          if item["editorial_confidence"] == "documented"
+            raise InvalidResponse unless item["kind"] == "news_article" && item["editorial_position"] != "unknown"
+            grounded_quote!(item, "editorial_quote")
+            text!(item["editorial_reason"], max: 2000, min: 20)
+          end
+        end
         raise InvalidResponse unless DOCUMENT_KINDS.include?(item.fetch("kind"))
         text!(item.fetch("reason"), max: 2000)
         grounded_quote!(item, "quote")

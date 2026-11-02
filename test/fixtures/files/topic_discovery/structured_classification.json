@@ -1,0 +1,84 @@
+{
+  "documents": [
+    {
+      "id": "S1",
+      "kind": "producer_publication",
+      "reason": "Publicação do Imazon sobre resultados de seu próprio sistema SAD, com comentários de seus pesquisadores. O corpo permite identificar essa relação de produção, independentemente do domínio. O recorte apresentado é janeiro a dezembro de 2024, distinguindo desmatamento de degradação; não deve ser equiparado automaticamente a outras séries ou períodos. A mensagem inicial de erro não impede identificar o conteúdo substantivo fornecido.",
+      "quote": "Os dados são do Sistema de Alerta de Desmatamento (SAD) do instituto de pesquisa Imazon, que monitora a região por imagens de satélite desde 2008.",
+      "editorial_position": "unknown",
+      "editorial_confidence": "unknown",
+      "editorial_reason": "Documento do produtor dos dados. A classificação editorial deve permanecer desconhecida; a atuação ambiental e os comentários dos pesquisadores não estabelecem alinhamento entre esquerda, centro e direita.",
+      "editorial_quote": ""
+    },
+    {
+      "id": "S2",
+      "kind": "news_article",
+      "reason": "Reportagem individual com título e corpo explicativo que atribui os resultados principalmente ao Imazon, acrescentando informações externas do MapBiomas e explicações sobre o INPE. Não é publicação dos produtores desses levantamentos. O texto distingue métodos, períodos de monitoramento e desmatamento de degradação; essas atribuições não constituem verificação independente das afirmações.",
+      "quote": "Os dados são do Sistema de Alerta de Desmatamento (SAD) do instituto, que diferem da metodologia do Deter, do Instituto Nacional de Pesquisas Espaciais (Inpe), que também divulgou números no começo deste mês.",
+      "editorial_position": "unknown",
+      "editorial_confidence": "unknown",
+      "editorial_reason": "O corpo não identifica uma orientação editorial de esquerda, centro ou direita. Explicar indicadores ambientais e reproduzir avaliações de pesquisadores não permite atribuir posição política ao veículo.",
+      "editorial_quote": ""
+    },
+    {
+      "id": "S3",
+      "kind": "producer_publication",
+      "reason": "Publicação da OTCA sobre processamento e análises realizados por seu Observatório Regional Amazônico, com declarações de integrantes desse observatório. A base externa é explicitamente atribuída ao Copernicus/JRC: a OTCA é produtora do processamento apresentado, não necessariamente dos dados de origem. O foco é a comparação de 2025 com 2024 nos oito países membros, com referências a 2023; esse escopo não equivale ao da Amazônia Legal brasileira.",
+      "quote": "Os dados foram processados pelo Observatório Regional Amazônico (ORA) da OTCA com base em informações do programa europeu Copernicus, por meio do Joint Research Centre (JRC), e estão disponíveis em mapas e gráficos na plataforma do ORA.",
+      "editorial_position": "unknown",
+      "editorial_confidence": "unknown",
+      "editorial_reason": "Publicação do produtor das análises, cuja posição editorial deve permanecer desconhecida. As explicações sobre fiscalização, clima e atividades ilegais não documentam alinhamento partidário ou ideológico.",
+      "editorial_quote": ""
+    },
+    {
+      "id": "S4",
+      "kind": "news_article",
+      "reason": "Texto individual que noticia resultados atribuídos ao relatório da Rede MapBiomas e acrescenta posicionamento institucional da REPAM. O levantamento é externo: a manifestação própria ao final não torna a REPAM produtora dos números noticiados. A página pode ser lida como notícia institucional com componente opinativo; essa característica não elimina seu título e corpo de matéria individual. O texto alterna Brasil, Amazônia Legal e biomas, exigindo preservar esses recortes sem validar ou harmonizar suas afirmações.",
+      "quote": "O Brasil registrou em 2024 uma redução de 32,4% no desmatamento em relação ao ano anterior, de acordo com o relatório anual da Rede MapBiomas divulgado em maio.",
+      "editorial_position": "unknown",
+      "editorial_confidence": "unknown",
+      "editorial_reason": "O corpo explicita compromissos socioambientais e com a Ecologia Integral, mas não estabelece sua correspondência com esquerda, centro ou direita. Não há base suficiente para converter essa perspectiva institucional em uma dessas posições.",
+      "editorial_quote": ""
+    },
+    {
+      "id": "S5",
+      "kind": "index_or_other",
+      "reason": "Arquivo anual que reúne diversos títulos e resumos interrompidos, não uma reportagem individual. Os trechos sobre meses específicos e dados do INPE são chamadas para outros conteúdos; não transformam o arquivo em matéria completa nem em publicação do produtor dos dados.",
+      "quote": "Em novembro, desmatamento no Cerrado cai 52% e 10% na Amazônia",
+      "editorial_position": "unknown",
+      "editorial_confidence": "unknown",
+      "editorial_reason": "Páginas de arquivo devem permanecer com posição editorial desconhecida. A seleção de chamadas ambientais não documenta alinhamento entre esquerda, centro e direita.",
+      "editorial_quote": ""
+    },
+    {
+      "id": "S6",
+      "kind": "producer_publication",
+      "reason": "Comunicado do INPE que apresenta estimativas e mapeamentos de sua atividade de monitoramento, remetendo às notas técnicas e ao portal de disponibilização. O recorte amazônico é agosto de 2023 a julho de 2024, não o ano civil. O corpo registra a data de divulgação como 06/11/2014, em tensão com o restante da apresentação de 2024; essa inconsistência deve ser preservada, não corrigida por suposição. A referência ao anúncio no Planalto contextualiza a divulgação, sem tornar todo conteúdo governamental fonte primária de qualquer afirmação.",
+      "quote": "O valor estimado do desmatamento no período de 01 de agosto de 2023 a 31 de julho de 2024 foi de 6.288 km².",
+      "editorial_position": "unknown",
+      "editorial_confidence": "unknown",
+      "editorial_reason": "Publicação do produtor do monitoramento. Sua vinculação institucional e a menção ao Palácio do Planalto não permitem atribuir orientação de esquerda, centro ou direita.",
+      "editorial_quote": ""
+    },
+    {
+      "id": "S7",
+      "kind": "producer_publication",
+      "reason": "Publicação do INPE sobre a taxa consolidada produzida por seu programa Prodes, com explicação de definição e método. O texto informa o uso de imagens externas da ESA pré-processadas por iniciativa do instituto; isso delimita a contribuição de cada produtor. O resultado principal corresponde a agosto de 2024 a julho de 2025 e usa 2024 como comparação, não respondendo diretamente pela variação do ano civil de 2024. As avaliações sobre aplicações e benefícios dos dados são afirmações institucionais, não verificações independentes.",
+      "quote": "Os dados são referentes ao período de 1º de agosto de 2024 a 31 de julho de 2025 e representam uma redução de 12,07% em relação à taxa de 2024, que foi de 6.518 km2.",
+      "editorial_position": "unknown",
+      "editorial_confidence": "unknown",
+      "editorial_reason": "Documento do produtor dos dados, sem classificação editorial política. O uso governamental do Prodes e as avaliações institucionais de seus benefícios não estabelecem alinhamento ideológico.",
+      "editorial_quote": ""
+    },
+    {
+      "id": "S8",
+      "kind": "index_or_other",
+      "reason": "Registro de catálogo de um relatório, com tamanho do PDF, código, número de páginas, editora e resumo. O corpo fornecido não contém o relatório integral nem uma reportagem individual. O resumo atribui os dados de base ao INPE e descreve uma análise sobre Terras Indígenas, mas não permite examinar essa análise completa nem classificar o registro como se fosse o próprio relatório.",
+      "quote": "Tamanho: 53.28 MB | Formato: PDF",
+      "editorial_position": "unknown",
+      "editorial_confidence": "unknown",
+      "editorial_reason": "Entrada de catálogo, cuja posição editorial deve permanecer desconhecida. Os temas e a identificação da editora não documentam uma orientação entre esquerda, centro e direita.",
+      "editorial_quote": ""
+    }
+  ]
+}

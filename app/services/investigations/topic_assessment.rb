@@ -61,7 +61,7 @@ module Investigations
       raise InvalidResponse unless @discovery.is_a?(Hash) && @discovery["status"] == "discovered"
       raise InvalidResponse unless @discovery["question"].is_a?(String) && @discovery["scope"].is_a?(String)
       docs = @discovery["documents"]
-      raise InvalidResponse unless docs.is_a?(Array) && docs.size.between?(1, 10) && docs.all? { |item| item.is_a?(Hash) && item["id"].is_a?(String) && item["body"].is_a?(String) && item["title"].is_a?(String) }
+      raise InvalidResponse unless docs.is_a?(Array) && docs.size.between?(1, 28) && docs.all? { |item| item.is_a?(Hash) && item["id"].is_a?(String) && item["body"].is_a?(String) && item["title"].is_a?(String) }
       raise InvalidResponse unless docs.pluck("id").uniq.size == docs.size
       @documents = docs.index_by { |item| item.fetch("id") }
       ids = @discovery["news_ids"]

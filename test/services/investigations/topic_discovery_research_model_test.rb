@@ -63,6 +63,14 @@ class Investigations::TopicDiscoveryResearchModelTest < ActiveSupport::TestCase
     assert_equal 8, result.dig("requirements", "ambiguities").size
   end
 
+  test "classifies editorial uncertainty using the live observed response shape" do
+    @payloads["topic_document_kinds"] = fixture("structured_classification")
+    result = @client.classify(question: "Amazônia", documents: fixture("documents"))
+    assert_equal fixture("documents").pluck("id").sort, result.fetch("documents").pluck("id").sort
+    assert result.fetch("documents").all? { |item| %w[documented provisional unknown].include?(item["editorial_confidence"]) }
+    assert result.fetch("documents").any? { |item| item["editorial_confidence"] == "unknown" }
+  end
+
   test "unavailable configured provider fails without attempting another provider" do
     ENV.delete("OPENROUTER_API_KEY")
     assert_raises(Investigations::TopicDiscovery::Unavailable) { @client.plan(question: "Vacinas infantis") }
