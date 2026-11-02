@@ -58,6 +58,7 @@ pt-BR:
       reading_evidence: "Lendo as fontes de evidência"
       classifying: "Identificando notícias e publicações originais"
     errors:
+      research_budget_exceeded: "O limite de tempo configurado para a pesquisa foi atingido. As fontes lidas continuam registradas; uma nova tentativa inicia outra execução."
       search_unavailable: "O serviço de busca falhou ou bloqueou o acesso. Isso não significa ausência de notícias pertinentes."
       enqueue_failed: "A fila está temporariamente indisponível. O envio será tentado novamente."
       interrupted: "O processamento foi interrompido. Você pode iniciar uma nova tentativa."

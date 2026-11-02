@@ -22,6 +22,8 @@ A fact does not become false because a million sources repeat a falsehood, and a
 
 ## What It Does
 
+- **Source selection:** Structured topic plans search up to eight queries and read up to 24 news candidates plus four evidence documents (at most eight evidence attempts). Blocked/irrelevant pages can be replaced within these bounds. Ownership and text-similarity checks prevent republications from counting as independent voices. Editorial quotas require documented classifications with literal evidence; uncertain sources can provide context but never fill missing quotas. Time is bounded by `FRANK_TOPIC_TIMEOUT_SECONDS` (default 900, maximum 1800); news attempts by `FRANK_TOPIC_NEWS_ATTEMPTS` (default/maximum 24).
+
 - **Search outcomes:** Topic discovery records each query and distinguishes a successful empty search from blocked, unavailable or timed-out search services. Transient failures get at most one retry; partial results remain usable.
 
 - **Structured research plans:** Topic questions preserve their original wording and store a versioned scope, subquestions, explicit territories and period, ambiguities, and requested editorial counts. Legacy plans remain readable. The scope is visible while research runs.

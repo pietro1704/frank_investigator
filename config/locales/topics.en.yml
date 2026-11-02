@@ -58,6 +58,7 @@ en:
       reading_evidence: "Reading evidence sources"
       classifying: "Identifying news and original publications"
     errors:
+      research_budget_exceeded: "The configured research time budget was reached. Read sources remain recorded; retry explicitly to start a new run."
       search_unavailable: "The search service failed or blocked access. This is not a finding that no relevant news exists."
       enqueue_failed: "The queue is temporarily unavailable. Delivery will be attempted again."
       interrupted: "Processing was interrupted. You can start a new attempt."

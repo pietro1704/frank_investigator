@@ -133,6 +133,64 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
     assert_equal first, @searcher.calls.first
   end
 
+  test "structured search replenishes unreadable news and keeps uncertain quota gaps explicit" do
+    @responses[:plan] = fixture("structured_plan")
+    @responses[:plan]["news_queries"] = [ "all candidates" ]
+    @responses[:plan]["evidence_queries"] = [ "no evidence" ]
+    docs = fixture("documents")
+    @searcher = Searcher.new({ "all candidates" => [ { "url" => "https://missing.example.org/report", "title" => "blocked", "snippet" => "" } ] + docs.first(4).map { |item| item.slice("url", "title").merge("snippet" => "") } })
+    @model.define_singleton_method(:screen) do |documents:, **|
+      { "reviews" => documents.map { |item| { "id" => item["id"], "relevant" => true, "reason" => "Relevant captured scope", "scope_quote" => item["body"][0, 60] } }, "evidence_queries" => [] }
+    end
+    @model.define_singleton_method(:classify) do |documents:, **|
+      { "documents" => documents.map { |item| { "id" => item["id"], "kind" => "news_article", "reason" => "Individual captured source", "quote" => item["body"][0, 60],
+        "editorial_position" => "unknown", "editorial_confidence" => "unknown", "editorial_reason" => "No explicit editorial statement", "editorial_quote" => "" } } }
+    end
+    result = discover
+    assert_equal "discovered", result.fetch("status")
+    assert_equal 4, result.fetch("documents").size
+    assert_equal 1, result.fetch("failures").size
+    refute result.dig("selection", "coverage_complete")
+    assert_equal 6, result.dig("selection", "missing").values.sum
+    assert result.fetch("news_ids").any?
+  end
+
+  test "replacement candidates fulfill six quotas despite an early blocked page" do
+    @responses[:plan] = fixture("structured_plan")
+    @responses[:plan]["news_queries"] = %w[first second]
+    @responses[:plan]["evidence_queries"] = [ "original evidence" ]
+    sides = %w[left left center center right right]
+    docs = sides.each_with_index.map do |side, index|
+      { "url" => "https://publication#{index}.example.org/report", "title" => "Independent #{index}",
+        "body" => "We explicitly identify our publication editorial perspective as #{side}. " + (1..100).map { |n| "report#{index}finding#{n}" }.join(" ") }
+    end
+    candidates = [ { "url" => "https://missing.example.org/report", "title" => "Blocked", "snippet" => "" } ] + docs.map { |item| item.slice("url", "title").merge("snippet" => "") }
+    @searcher = Searcher.new({ "first" => candidates.first(5), "second" => candidates.drop(5) })
+    @fetcher = Fetcher.new(docs)
+    @model.define_singleton_method(:screen) do |documents:, **|
+      { "reviews" => documents.map { |item| { "id" => item["id"], "relevant" => true, "reason" => "Requested subject and scope", "scope_quote" => item["body"][0, 70] } }, "evidence_queries" => [] }
+    end
+    @model.define_singleton_method(:classify) do |documents:, **|
+      { "documents" => documents.map do |item|
+        side = item["body"][/perspective as (left|center|right)/, 1]
+        { "id" => item["id"], "kind" => "news_article", "reason" => "Individual report", "quote" => item["body"][0, 70],
+          "editorial_position" => side, "editorial_confidence" => "documented", "editorial_reason" => "Publication explicitly self-identifies its perspective", "editorial_quote" => item["body"][0, 70] }
+      end }
+    end
+    result = discover
+    assert_equal 6, result.fetch("news_ids").size
+    assert result.dig("selection", "coverage_complete")
+    assert_equal 1, result.fetch("failures").size
+    assert_equal 7, @fetcher.calls.size
+  end
+
+  test "documented editorial labels must cite this source rather than a politician or another source" do
+    @responses[:classify] = fixture("structured_classification")
+    item = @responses[:classify].fetch("documents").find { |entry| entry["kind"] == "news_article" }
+    item.merge!("editorial_position" => "right", "editorial_confidence" => "documented", "editorial_reason" => "Publication explicitly declares its orientation", "editorial_quote" => "This literal declaration was never present in the body")
+    assert_raises(Investigations::TopicDiscovery::InvalidResponse) { discover }
+  end
+
   test "rejects invalid questions before any model search or browser call" do
     [ nil, [], {}, " ", "a" * 501, "12345" ].each do |question|
       assert_raises(Investigations::TopicDiscovery::InvalidQuestion) { discover(question:) }

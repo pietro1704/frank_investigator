@@ -11,7 +11,8 @@ module Investigations
       keys = raw.keys.sort
       raise TopicDiscovery::InvalidResponse unless [ BASE_KEYS.sort, (BASE_KEYS + [ "requirements" ]).sort ].include?(keys)
       text!(raw["scope"], 2000)
-      %w[news_queries evidence_queries].each { |key| list!(raw[key], 2, 300, min: 1) }
+      list!(raw["news_queries"], raw.key?("requirements") ? 8 : 2, 300, min: 1)
+      list!(raw["evidence_queries"], 2, 300, min: 1)
       result = raw.deep_dup
       result["version"] = raw.key?("requirements") ? 2 : 1
       result["requirements"] ||= { "subquestions" => [], "territories" => [], "reference_period" => "",

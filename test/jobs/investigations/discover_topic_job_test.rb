@@ -33,6 +33,13 @@ class Investigations::DiscoverTopicJobTest < ActiveJob::TestCase
     assert_empty @topic.report
   end
 
+  test "research time exhaustion preserves a terminal diagnostic without publishing a report" do
+    with_discovery(->(**) { raise Investigations::TopicDiscovery::BudgetExceeded }) { perform }
+    assert_predicate @topic.reload, :failed?
+    assert_equal "research_budget_exceeded", @topic.error_code
+    assert_empty @topic.report
+  end
+
   test "no news is terminal but does not manufacture a factual verdict" do
     @result.merge!("status" => "no_news", "news_ids" => [])
     with_discovery(->(**) { @result }) { perform }
