@@ -1,5 +1,11 @@
 pt-BR:
   topics:
+    research_plan: "Recorte da pesquisa"
+    requested_side: "%{side}: %{count} matérias solicitadas"
+    sides:
+      left: "Esquerda"
+      center: "Centro"
+      right: "Direita"
     heading: "Investigar um assunto"
     home: "Voltar ao Frank"
     new_search: "Investigar outro assunto"

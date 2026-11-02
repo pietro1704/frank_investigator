@@ -39,7 +39,7 @@ module Investigations
 
     def call
       progress("planning")
-      plan = @model.plan(question: @question)
+      plan = TopicPlan.call(@model.plan(question: @question))
       validate_plan!(plan)
       @result.merge!("plan" => plan, "scope" => plan.fetch("scope"))
 
@@ -160,7 +160,7 @@ module Investigations
     end
 
     def validate_plan!(plan)
-      object!(plan, %w[scope news_queries evidence_queries])
+      object!(plan, %w[scope news_queries evidence_queries requirements version])
       text!(plan.fetch("scope"), max: 2000)
       queries!(plan.fetch("news_queries"), min: 1)
       queries!(plan.fetch("evidence_queries"), min: 1)

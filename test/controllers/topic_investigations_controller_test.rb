@@ -41,6 +41,18 @@ class TopicInvestigationsControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?]", cancel_topic_investigation_path(topic)
   end
 
+  test "stored structured scope is visible and escaped during progress" do
+    plan = JSON.parse(File.read(Rails.root.join("test/fixtures/files/topic_discovery/structured_plan.json")))
+    plan = Investigations::TopicPlan.call(plan)
+    plan["scope"] = "<script>scope</script>"
+    topic = TopicInvestigation.create!(question: "Schools?", discovery: { "plan" => plan })
+    get topic_investigation_path(topic)
+    assert_select "[data-research-plan]", count: 1
+    assert_select "[data-research-plan] script", count: 0
+    assert_includes response.body, "&lt;script&gt;scope&lt;/script&gt;"
+    assert_includes response.body, "Left: 2 requested articles"
+  end
+
   test "GET requests remain read only and pending JSON is not ready or cacheable" do
     topic = TopicInvestigation.create!(question: "Vacinas infantis")
     assert_no_difference "TopicInvestigation.count" do
