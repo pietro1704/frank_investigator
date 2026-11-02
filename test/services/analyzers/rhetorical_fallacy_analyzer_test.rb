@@ -156,12 +156,14 @@ class RhetoricalFallacyAnalyzerTest < ActiveSupport::TestCase
     assert_equal @claim.canonical_text, result.fallacies.first.undermined_claim
   end
 
-  test "prompt carries evidence source-role metadata" do
+  test "provider prompt keeps root article identity while carrying evidence source-role metadata" do
+    @article.update!(body_text: "Root report about crime statistics. " * 30)
     evidence_article = Article.create!(
       url: "https://agency.gov/statement",
       normalized_url: "https://agency.gov/statement-#{SecureRandom.hex(4)}",
       host: "agency.gov",
       title: "Agency statement",
+      body_text: "Unrelated agency evidence about an education poll.",
       fetch_status: :fetched,
       source_role: :official_position,
       authority_tier: :primary
@@ -173,8 +175,13 @@ class RhetoricalFallacyAnalyzerTest < ActiveSupport::TestCase
       stance: :supports
     )
 
-    analyzer = Analyzers::RhetoricalFallacyAnalyzer.new(investigation: @investigation)
-    prompt = JSON.parse(analyzer.send(:build_prompt, @article))
+    with_configured_llm { Analyzers::RhetoricalFallacyAnalyzer.call(investigation: @investigation) }
+    interaction = LlmInteraction.find_by!(investigation: @investigation, interaction_type: :rhetorical_analysis)
+    assert_predicate interaction, :completed?
+    prompt = JSON.parse(interaction.prompt_text)
+    assert_equal @article.title, prompt.fetch("article_title")
+    assert_equal @article.body_text, prompt.fetch("article_body")
+    assert_equal @article.source_kind, prompt.fetch("article_source_kind")
 
     assert_equal "official_position", prompt.dig("assessed_claims", 0, "evidence_sources", 0, "source_role")
     assert_includes Analyzers::RhetoricalFallacyAnalyzer::SYSTEM_PROMPT_TEMPLATE, "NOT proof that"
@@ -195,6 +202,20 @@ class RhetoricalFallacyAnalyzerTest < ActiveSupport::TestCase
   end
 
   private
+
+  def with_configured_llm
+    options = Rails.configuration.x.frank_investigator
+    previous_provider, previous_models = options.llm_provider, options.llm_models
+    previous_key, previous_client_key = ENV["OPENROUTER_API_KEY"], RubyLLM.config.openrouter_api_key
+    options.llm_provider = "openrouter"
+    options.llm_models = [ "openai/gpt-5-mini" ]
+    ENV["OPENROUTER_API_KEY"] = "test-rhetorical-identity"
+    RubyLLM.config.openrouter_api_key = "test-rhetorical-identity"
+    yield
+  ensure
+    options.llm_provider, options.llm_models = previous_provider, previous_models
+    ENV["OPENROUTER_API_KEY"], RubyLLM.config.openrouter_api_key = previous_key, previous_client_key
+  end
 
   def without_llm
     saved = ENV["OPENROUTER_API_KEY"]

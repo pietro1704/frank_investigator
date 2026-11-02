@@ -253,12 +253,12 @@ module Analyzers
           authority_score: assessment.authority_score.to_f,
           has_primary_evidence: assessment.evidence_items.any? { |e| e.article&.authority_tier == "primary" },
           evidence_sources: assessment.evidence_items.filter_map { |e|
-            article = e.article
-            next unless article
+            evidence_article = e.article
+            next unless evidence_article
 
             {
-              source_role: article.source_role,
-              authority_tier: article.authority_tier,
+              source_role: evidence_article.source_role,
+              authority_tier: evidence_article.authority_tier,
               stance: e.stance,
               source_type: e.source_type
             }
