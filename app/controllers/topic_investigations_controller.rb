@@ -51,12 +51,23 @@ class TopicInvestigationsController < ApplicationController
   end
 
   def representation
+    coverage = TopicCoveragePresenter.call(@topic)
     { slug: @topic.slug, question: @topic.question, status: @topic.status, stage: @topic.stage,
-      ready: @topic.completed?, error_code: @topic.error_code,
+      ready: @topic.completed? && coverage.fetch("complete"), terminal: !active?,
+      report_available: @topic.completed? && @topic.report.present?, coverage:,
+      plan: @topic.discovery["plan"], error_code: @topic.error_code,
       started_at: @topic.started_at, finished_at: @topic.finished_at,
-      report: @topic.report.except("model_result"),
+      report: public_report,
       sources: Array(@topic.discovery["documents"]).map { |item| item.slice("id", "title", "url", "kind", "fetched_at", "truncated") },
       failures: Array(@topic.discovery["failures"]) }
+  end
+
+  def public_report
+    report = @topic.report.except("model_result").deep_dup
+    if report.key?("full_analyses")
+      report["full_analyses"] = Array(report["full_analyses"]).map { |item| item.except("evidence_documents") }
+    end
+    report
   end
 
   def conflict

@@ -125,7 +125,7 @@ module Investigations
 
     def select_documents!(relevant_ids, plan)
       @result["selection"] = TopicSourceSelection.call(documents:, relevant_ids:,
-        editorial_counts: plan.dig("requirements", "editorial_counts"))
+        editorial_counts: plan.dig("requirements", "editorial_counts"), news_count: plan.dig("requirements", "news_count").to_i)
       @result["news_ids"] = @result.fetch("selection").fetch("news_ids")
       @result["producer_ids"] = documents.select { |item| item["kind"] == "producer_publication" }.pluck("id")
       @result["excluded_ids"] = documents.select { |item| item["kind"] == "index_or_other" }.pluck("id")

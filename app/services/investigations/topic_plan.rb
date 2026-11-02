@@ -18,13 +18,16 @@ module Investigations
       result["requirements"] ||= { "subquestions" => [], "territories" => [], "reference_period" => "",
         "ambiguities" => [], "editorial_counts" => SIDES.index_with { 0 } }
       requirements = result.fetch("requirements")
-      raise TopicDiscovery::InvalidResponse unless requirements.is_a?(Hash) && requirements.keys.sort == REQUIREMENT_KEYS.sort
+      raise TopicDiscovery::InvalidResponse unless requirements.is_a?(Hash) && [ REQUIREMENT_KEYS.sort, (REQUIREMENT_KEYS + [ "news_count" ]).sort ].include?(requirements.keys.sort)
       %w[subquestions territories].each { |key| list!(requirements[key], 6, 1000) }
       list!(requirements["ambiguities"], 12, 1000)
       text!(requirements["reference_period"], 300, min: 0)
       counts = requirements["editorial_counts"]
       raise TopicDiscovery::InvalidResponse unless counts.is_a?(Hash) && counts.keys.sort == SIDES.sort &&
         counts.values.all? { |value| value.is_a?(Integer) && value.between?(0, MAX_NEWS) } && counts.values.sum <= MAX_NEWS
+      total = requirements.fetch("news_count", 0)
+      raise TopicDiscovery::InvalidResponse unless total.is_a?(Integer) && total.between?(0, MAX_NEWS) &&
+        (total.zero? || counts.values.sum.zero? || total == counts.values.sum)
       result
     end
 

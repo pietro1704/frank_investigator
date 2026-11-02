@@ -10,6 +10,14 @@ class Investigations::TopicSourceSelectionTest < ActiveSupport::TestCase
     Investigations::TopicSourceSelection.call(documents: docs, relevant_ids: docs.pluck("id"), editorial_counts: counts)
   end
 
+  test "explicit overall count bounds selection without editorial quotas" do
+    docs = (1..5).map { |i| source("S#{i}", "unknown", confidence: "unknown") }
+    result = Investigations::TopicSourceSelection.call(documents: docs, relevant_ids: docs.pluck("id"),
+      editorial_counts: { "left" => 0, "center" => 0, "right" => 0 }, news_count: 3)
+    assert_equal 3, result["news_ids"].size
+    assert result["coverage_complete"]
+  end
+
   test "quotas use documented positions only and do not substitute primary evidence" do
     docs = [ source("S1", "left"), source("S2", "center", confidence: "provisional"), source("S3", "right"), source("S4", "center") ]
     docs << source("S5", "center").merge("kind" => "producer_publication")

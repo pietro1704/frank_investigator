@@ -1,0 +1,35 @@
+{
+  "scope": "Investigar o que é fascismo e selecionar três notícias que ajudem a compreender o conceito, suas características e as controvérsias sobre seu uso, sem cotas editoriais e sem restringir a pesquisa a um país ou período não solicitado.",
+  "news_queries": [
+    "\"fascismo\" o que é historiadores notícia",
+    "\"fascismo\" características definição reportagem",
+    "\"fascismo\" controvérsia uso do termo especialistas notícia",
+    "\"fascismo\" limites de comparação histórica reportagem"
+  ],
+  "evidence_queries": [
+    "\"fascismo\" documentos originais manifestos programas políticos acervo",
+    "\"fascismo\" definição estudo acadêmico evidências críticas limites do conceito"
+  ],
+  "requirements": {
+    "subquestions": [
+      "Como o fascismo é definido e quais características são apontadas nas fontes históricas e acadêmicas?",
+      "Quais evidências históricas fundamentam essas definições e quais divergências ou limitações são apresentadas?",
+      "Como três notícias abordam o conceito e quais evidências sustentam ou contestam os usos do termo nelas apresentados?"
+    ],
+    "territories": [],
+    "reference_period": "",
+    "ambiguities": [
+      "Não foi especificado país ou território; não restringir a busca a um único país.",
+      "Não foi especificado período histórico nem intervalo de publicação das notícias.",
+      "Não foi indicada uma definição ou corrente historiográfica de referência.",
+      "Não foram especificados uma base de comparação ou critérios de mensuração; não presumir classificações de casos concretos.",
+      "O pedido dispensa cotas editoriais; selecionar três notícias sem distribuição obrigatória entre esquerda, centro e direita."
+    ],
+    "news_count": 3,
+    "editorial_counts": {
+      "left": 0,
+      "center": 0,
+      "right": 0
+    }
+  }
+}
