@@ -31,6 +31,8 @@ module Investigations
       case error
       when TopicInvestigation::InvalidDiscovery, TopicDiscovery::InvalidResponse
         "invalid_result"
+      when TopicDiscovery::SearchUnavailable
+        "search_unavailable"
       when TopicDiscovery::Unavailable
         "provider_unavailable"
       when Llm::Chatgpt::Error

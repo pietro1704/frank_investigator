@@ -97,6 +97,42 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
     refute result.key?("verdict"), "retrieval alone must never produce a factual assessment"
   end
 
+  test "failed searches are retried once recorded and never treated as no news" do
+    @searcher.define_singleton_method(:call_with_status) do |query:, max_results:|
+      @calls << query
+      Fetchers::WebSearcher::Outcome.new(results: [], status: "failed", error_code: "timeout")
+    end
+    snapshots = []
+    assert_raises(Investigations::TopicDiscovery::SearchUnavailable) do
+      discover(on_progress: ->(_, snapshot) { snapshots << snapshot })
+    end
+    assert_equal 4, @searcher.calls.size
+    assert_equal 4, snapshots.last.fetch("searches").size
+    assert_empty @fetcher.calls
+  end
+
+  test "a failed query does not discard results from an independent successful query" do
+    first = @responses[:plan]["news_queries"].first
+    @searcher.define_singleton_method(:call_with_status) do |query:, max_results:|
+      if query == first
+        @calls << query
+        Fetchers::WebSearcher::Outcome.new(results: [], status: "failed", error_code: "blocked")
+      else
+        Fetchers::WebSearcher::Outcome.new(results: call(query:, max_results:), status: "success")
+      end
+    end
+    # The pre-existing fixture corpus has source IDs tied to its complete input;
+    # stop after retrieval to check the retained source text, not model answers.
+    captured = nil
+    @model.define_singleton_method(:screen) do |**args|
+      captured = args.fetch(:documents)
+      raise Investigations::TopicDiscovery::Cancelled
+    end
+    assert_raises(Investigations::TopicDiscovery::Cancelled) { discover }
+    assert captured.any?
+    assert_equal first, @searcher.calls.first
+  end
+
   test "rejects invalid questions before any model search or browser call" do
     [ nil, [], {}, " ", "a" * 501, "12345" ].each do |question|
       assert_raises(Investigations::TopicDiscovery::InvalidQuestion) { discover(question:) }

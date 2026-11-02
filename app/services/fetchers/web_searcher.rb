@@ -5,8 +5,13 @@ require "digest"
 module Fetchers
   class WebSearcher
     SearchResult = Struct.new(:url, :title, :snippet, keyword_init: true)
+    Outcome = Struct.new(:results, :status, :error_code, keyword_init: true)
     MAX_RESULTS = 8
     CACHE_TTL = 24.hours
+
+    def self.call_with_status(query:, max_results: MAX_RESULTS)
+      new(query:, max_results:).call_with_status
+    end
 
     def self.call(query:, max_results: MAX_RESULTS)
       new(query:, max_results:).call
@@ -18,19 +23,30 @@ module Fetchers
     end
 
     def call
-      return [] if @query.blank?
+      call_with_status.results
+    end
+
+    def call_with_status
+      return Outcome.new(results: [], status: "success") if @query.blank?
 
       cache_key = "web_search:#{Digest::SHA256.hexdigest(@query)}"
       cached = Rails.cache.read(cache_key)
-      return cached.first(@max_results) if cached
+      return Outcome.new(results: cached.first(@max_results), status: "success") if cached
 
+      @search_error = nil
       results = search_duckduckgo_via_chromium
+      return Outcome.new(results: [], status: "failed", error_code: @search_error) if @search_error
       results = results.uniq { |r| r.url }
       results = filter_article_urls(results)
       results = results.first(@max_results)
 
       Rails.cache.write(cache_key, results, expires_in: CACHE_TTL) if results.any?
-      results
+      Outcome.new(results:, status: "success")
+    rescue Timeout::Error, Ferrum::TimeoutError
+      Outcome.new(results: [], status: "failed", error_code: "timeout")
+    rescue StandardError => error
+      Rails.logger.warn("[WebSearcher] Search unavailable (#{error.class.name})")
+      Outcome.new(results: [], status: "failed", error_code: "unavailable")
     end
 
     private
@@ -51,13 +67,18 @@ module Fetchers
         wait_for_results(page)
 
         html = page.body
-        parse_duckduckgo_results(html)
+        results = parse_duckduckgo_results(html)
+        if results.empty?
+          @search_error = if html.match?(/captcha|anomaly-modal|verify you are human/i)
+            "blocked"
+          elsif !html.match?(/no results|nenhum resultado|no-results/i)
+            "unavailable"
+          end
+        end
+        results
       ensure
         browser.quit
       end
-    rescue StandardError => e
-      Rails.logger.warn("[WebSearcher] DuckDuckGo Chromium search failed: #{e.message}")
-      []
     end
 
     def parse_duckduckgo_results(html)

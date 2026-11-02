@@ -22,6 +22,8 @@ A fact does not become false because a million sources repeat a falsehood, and a
 
 ## What It Does
 
+- **Search outcomes:** Topic discovery records each query and distinguishes a successful empty search from blocked, unavailable or timed-out search services. Transient failures get at most one retry; partial results remain usable.
+
 - **Structured research plans:** Topic questions preserve their original wording and store a versioned scope, subquestions, explicit territories and period, ambiguities, and requested editorial counts. Legacy plans remain readable. The scope is visible while research runs.
 
 - **Topic investigations:** ask in natural language on the home page or `/topic_investigations/new`. `POST /topic_investigations` starts background research; `/topic_investigations/:slug` (also `.json`) shows progress and the brief report. Frank discovers news and original evidence, checks each article's central assertion, and reuses the existing editorial summary visual. Factual verdicts remain distinct from editorial quality. Evidence quotations and source identities are validated; absent original support stays `needs_more_evidence`, primary contradictions veto definitive support, and opinion remains uncheckable. Cancellation and explicit retry fence late jobs. Archive search remains read-only.

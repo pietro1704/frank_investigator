@@ -45,6 +45,7 @@ module Investigations
         item
       end
       limitations = raw.fetch("limitations").dup
+      limitations << I18n.t("topics.errors.search_unavailable") if @discovery.fetch("searches", []).any? { |item| item["status"] == "failed" }
       limitations << I18n.t("topic_assessment.unreadable") if @discovery.fetch("failures", []).any?
       limitations << I18n.t("topic_assessment.truncated") if @documents.values.any? { |item| item["truncated"] }
       check_cancelled!
