@@ -41,6 +41,18 @@ module Investigations
           item["weaknesses"].unshift(explanation)
           item["overall_quality"] = verdict == "mixed" ? (item["overall_quality"] == "strong" ? "mixed" : item["overall_quality"]) : "insufficient"
         end
+        if @discovery["analysis_phase_complete"]
+          analysis = @discovery.fetch("full_analyses").find { |entry| entry["source_id"] == item["source_id"] }
+          item["analysis_slug"] = analysis["slug"]
+          item["full_analysis_status"] = analysis["status"]
+          if analysis["status"] != "ready" && item["verdict"] != "not_checkable"
+            adjusted = true
+            item["verdict"] = "needs_more_evidence"
+            item["overall_quality"] = "insufficient"
+            item["conclusion"] = I18n.t("topics.errors.analysis_incomplete")
+            item["weaknesses"].unshift(item["conclusion"])
+          end
+        end
         item["evidence_ids"] = item.fetch("evidence").pluck("source_id").uniq
         item
       end
@@ -52,7 +64,7 @@ module Investigations
       { "question" => @discovery.fetch("question"), "scope" => @discovery.fetch("scope"),
         "conclusion" => adjusted ? I18n.t("topic_assessment.adjusted") : raw.fetch("conclusion"),
         "limitations" => limitations.uniq, "articles" => normalized,
-        "assessed_at" => Time.current.iso8601, "model_result" => raw }
+        "assessed_at" => Time.current.iso8601, "full_analyses" => @discovery.fetch("full_analyses", []), "model_result" => raw }
     end
 
     private
@@ -66,6 +78,11 @@ module Investigations
       @documents = docs.index_by { |item| item.fetch("id") }
       ids = @discovery["news_ids"]
       raise InvalidResponse unless ids.is_a?(Array) && ids.any? && ids.uniq.size == ids.size
+      if @discovery["analysis_phase_complete"]
+        snapshots = @discovery["full_analyses"]
+        raise InvalidResponse unless snapshots.is_a?(Array) && snapshots.all? { |item| item.is_a?(Hash) && %w[ready failed stale].include?(item["status"]) } &&
+          snapshots.pluck("source_id").sort == ids.sort
+      end
       raise InvalidResponse unless ids.all? { |id| @documents[id]&.fetch("kind", nil) == "news_article" }
     end
 

@@ -5,12 +5,12 @@ class TopicInvestigation < ApplicationRecord
   has_many :topic_analysis_links, dependent: :delete_all
 
   LEASE_FOR = 5.minutes
-  ACTIVE_STATUSES = %w[queued researching awaiting_assessment assessing].freeze
+  ACTIVE_STATUSES = %w[queued researching awaiting_assessment assessing awaiting_analyses monitoring_analyses].freeze
   DISCOVERY_STAGES = %w[planning searching_news reading_news screening searching_evidence reading_evidence classifying].freeze
 
   enum :status, {
     queued: "queued", researching: "researching", awaiting_assessment: "awaiting_assessment",
-    assessing: "assessing", completed: "completed", no_news: "no_news", failed: "failed", cancelled: "cancelled"
+    assessing: "assessing", awaiting_analyses: "awaiting_analyses", monitoring_analyses: "monitoring_analyses", completed: "completed", no_news: "no_news", failed: "failed", cancelled: "cancelled"
   }, default: :queued, validate: true
 
   attr_readonly :question, :slug
@@ -74,6 +74,39 @@ class TopicInvestigation < ApplicationRecord
     raise InvalidReport unless valid
     execution_scope(run_token:, lease_token:, phase: "assessing").update_all(status: "completed", stage: "completed", report:,
       lease_token: nil, lease_expires_at: nil, finished_at: Time.current, updated_at: Time.current) == 1
+  end
+
+  def full_analysis_required?
+    discovery.dig("plan", "version").to_i >= 2
+  end
+
+  def wait_for_analyses!(run_token:, lease_token:)
+    snapshot = discovery.deep_dup
+    snapshot["analysis_started_at"] = Time.current.iso8601
+    execution_scope(run_token:, lease_token:, phase: "assessing").update_all(status: "awaiting_analyses", stage: "awaiting_analyses",
+      discovery: snapshot, lease_token: nil, lease_expires_at: nil, updated_at: Time.current) == 1
+  end
+
+  def claim_monitoring!(run_token:, delivery_token: nil)
+    with_lock do
+      return unless self.run_token == run_token && awaiting_analyses?
+      return if lease_expires_at&.future? && (delivery_token.blank? || lease_token != delivery_token)
+      token = SecureRandom.uuid
+      update!(status: :monitoring_analyses, stage: "monitoring_analyses", lease_token: token,
+        lease_expires_at: LEASE_FOR.from_now, error_code: nil)
+      token
+    end
+  end
+
+  def publish_analysis_progress!(run_token:, lease_token:, snapshots:, pending:)
+    snapshot = discovery.deep_dup
+    snapshot["full_analyses"] = snapshots
+    ready = snapshots.any? { |item| item["status"] == "ready" }
+    state = pending ? "awaiting_analyses" : (ready ? "awaiting_assessment" : "failed")
+    snapshot["analysis_phase_complete"] = true unless pending
+    execution_scope(run_token:, lease_token:, phase: "monitoring_analyses").update_all(status: state, stage: state, discovery: snapshot,
+      lease_token: nil, lease_expires_at: (Investigations::MonitorTopicAnalysesJob::POLL_DELAY.from_now if pending),
+      error_code: ("analyses_failed" if state == "failed"), finished_at: (Time.current if state == "failed"), updated_at: Time.current) == 1
   end
 
   def cancel!

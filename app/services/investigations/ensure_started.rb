@@ -1,10 +1,11 @@
 module Investigations
   class EnsureStarted
-    def self.call(submitted_url:, auto_submitted_from: nil)
-      new(submitted_url:, auto_submitted_from:).call
+    def self.call(submitted_url:, auto_submitted_from: nil, auto_submit_limit: nil)
+      new(submitted_url:, auto_submitted_from:, auto_submit_limit:).call
     end
 
-    def initialize(submitted_url:, auto_submitted_from: nil)
+    def initialize(submitted_url:, auto_submitted_from: nil, auto_submit_limit: nil)
+      @auto_submit_limit = auto_submit_limit
       @submitted_url = submitted_url
       @auto_submitted_from_id = auto_submitted_from.respond_to?(:id) ? auto_submitted_from.id : auto_submitted_from
     end
@@ -17,6 +18,7 @@ module Investigations
         article = find_or_create_article!(normalized_url)
 
         Investigation.find_or_create_by!(normalized_url:) do |record|
+          record.auto_submit_limit = @auto_submit_limit
           record.submitted_url = @submitted_url
           record.root_article = article
           record.auto_submitted_from_id = @auto_submitted_from_id

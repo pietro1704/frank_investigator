@@ -28,6 +28,24 @@ class Investigations::SubmitTopicTest < ActiveSupport::TestCase
     assert_equal topic.slug, topic.to_param
   end
 
+  test "structured discovery routes to full analyses and monitoring deliveries carry their lease identity" do
+    topic = TopicInvestigation.create!(question: "Universities?", status: :awaiting_assessment, discovery: { "plan" => { "version" => 2 } })
+    assert_enqueued_with(job: Investigations::StartTopicAnalysesJob) do
+      assert Investigations::TopicResearchDelivery.dispatch(topic.id, topic.run_token)
+    end
+    topic.reload.update!(status: :awaiting_analyses, lease_token: nil, lease_expires_at: nil)
+    clear_enqueued_jobs
+    assert_enqueued_with(job: Investigations::MonitorTopicAnalysesJob) do
+      assert Investigations::TopicResearchDelivery.dispatch(topic.id, topic.run_token)
+    end
+    assert_equal [ topic.id, topic.run_token, topic.reload.lease_token ], enqueued_jobs.sole.fetch(:args)
+    refute Investigations::TopicResearchDelivery.dispatch(topic.id, topic.run_token)
+    topic.update!(lease_token: nil, lease_expires_at: 1.minute.ago)
+    assert_enqueued_with(job: Investigations::MonitorTopicAnalysesJob) do
+      Investigations::RecoverTopicResearchJob.perform_now
+    end
+  end
+
   test "invalid original input cannot be coerced into a persisted question" do
     [ nil, [], {}, " ", "12345", "a" * 501 ].each do |question|
       assert_raises(Investigations::TopicDiscovery::InvalidQuestion) { Investigations::SubmitTopic.call(question:) }

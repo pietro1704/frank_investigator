@@ -1,5 +1,7 @@
 pt-BR:
   topics:
+    full_scope: "Pesquisa com análises completas das notícias e avaliação consolidada baseada nas fontes. Análises e evidências ausentes permanecem como limitações explícitas."
+    full_report: "Ler análise completa da notícia"
     research_plan: "Recorte da pesquisa"
     requested_side: "%{side}: %{count} matérias solicitadas"
     sides:
@@ -41,6 +43,8 @@ pt-BR:
       disputes: "Contesta a afirmação verificada"
       context: "Acrescenta contexto; não comprova a afirmação por si só"
     states:
+      awaiting_analyses: "Aguardando análises completas das notícias"
+      monitoring_analyses: "Conferindo as análises completas das notícias"
       queued: "Aguardando início"
       researching: "Pesquisando fontes"
       awaiting_assessment: "Fontes coletadas; aguardando avaliação"
@@ -58,6 +62,10 @@ pt-BR:
       reading_evidence: "Lendo as fontes de evidência"
       classifying: "Identificando notícias e publicações originais"
     errors:
+      analysis_submission_failed: "Não foi possível enviar todas as análises completas. Uma nova tentativa inicia outra execução."
+      analysis_monitoring_failed: "Não foi possível validar o andamento das análises completas. Nenhum relatório final foi publicado."
+      analyses_failed: "Nenhuma análise completa e atual ficou disponível. Isso não confirma nem refuta a pergunta."
+      analysis_incomplete: "A análise completa falhou, expirou ou não pôde ser validada; este ponto continua sem verificação suficiente."
       research_budget_exceeded: "O limite de tempo configurado para a pesquisa foi atingido. As fontes lidas continuam registradas; uma nova tentativa inicia outra execução."
       search_unavailable: "O serviço de busca falhou ou bloqueou o acesso. Isso não significa ausência de notícias pertinentes."
       enqueue_failed: "A fila está temporariamente indisponível. O envio será tentado novamente."

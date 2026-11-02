@@ -33,6 +33,16 @@ class Investigations::TopicAssessmentTest < ActiveSupport::TestCase
     assert result.fetch("articles").all? { |item| item["evidence_ids"].is_a?(Array) }
   end
 
+  test "missing full analyses cannot be ratified by the brief model assessment" do
+    @input["analysis_phase_complete"] = true
+    @input["full_analyses"] = @input.fetch("news_ids").map { |id| { "source_id" => id, "status" => "failed", "slug" => "report" } }
+    result = assess
+    assert result.fetch("articles").all? { |item| %w[needs_more_evidence not_checkable].include?(item["verdict"]) }
+    assert result.fetch("articles").all? { |item| item["full_analysis_status"] == "failed" }
+    @input["full_analyses"].first["source_id"] = "foreign"
+    assert_raises(Investigations::TopicAssessment::InvalidResponse) { assess }
+  end
+
   test "producer classification without claim-specific original support cannot ratify a story" do
     article = supported_article
     article.fetch("evidence").each { |item| item["primary_reason"] = "" }
