@@ -26,6 +26,13 @@ class Investigations::DiscoverTopicJobTest < ActiveJob::TestCase
     assert_equal 1, @calls
   end
 
+  test "search failure is terminal failure rather than an empty research finding" do
+    with_discovery(->(**) { raise Investigations::TopicDiscovery::SearchUnavailable }) { perform }
+    assert_predicate @topic.reload, :failed?
+    assert_equal "search_unavailable", @topic.error_code
+    assert_empty @topic.report
+  end
+
   test "no news is terminal but does not manufacture a factual verdict" do
     @result.merge!("status" => "no_news", "news_ids" => [])
     with_discovery(->(**) { @result }) { perform }

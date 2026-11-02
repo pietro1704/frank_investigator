@@ -8,6 +8,7 @@ module Investigations
     class InvalidResponse < StandardError; end
     class Cancelled < StandardError; end
     class Unavailable < StandardError; end
+    class SearchUnavailable < StandardError; end
 
     MAX_QUESTION_LENGTH = 500
     MAX_NEWS_PAGES = 6
@@ -34,7 +35,7 @@ module Investigations
       @cancelled, @on_progress = cancelled, on_progress
       @visited = Set.new
       @result = { "question" => @question, "status" => "discovering", "scope" => nil,
-        "documents" => [], "failures" => [], "news_ids" => [], "producer_ids" => [], "excluded_ids" => [] }
+        "documents" => [], "failures" => [], "searches" => [], "news_ids" => [], "producer_ids" => [], "excluded_ids" => [] }
     end
 
     def call
@@ -44,7 +45,7 @@ module Investigations
       @result.merge!("plan" => plan, "scope" => plan.fetch("scope"))
 
       progress("searching_news")
-      candidates = search(plan.fetch("news_queries"))
+      candidates = search(plan.fetch("news_queries"), stage: "searching_news")
       read(candidates, role: "news", limit: MAX_NEWS_PAGES)
       return no_news if documents.empty?
 
@@ -57,7 +58,7 @@ module Investigations
 
       progress("searching_evidence")
       queries = (screen.fetch("evidence_queries") + plan.fetch("evidence_queries")).uniq.first(4)
-      candidates = search(queries)
+      candidates = search(queries, stage: "searching_evidence")
       read(candidates, role: "evidence", limit: MAX_EVIDENCE_PAGES)
 
       progress("classifying")
@@ -96,15 +97,31 @@ module Investigations
       @result
     end
 
-    def search(queries)
+    def search(queries, stage:)
+      successful = 0
       pages = queries.map do |query|
-        check_cancelled!
-        results = @searcher.call(query:, max_results: 5)
-        check_cancelled!
-        results.first(5)
+        results = []
+        2.times do |attempt|
+          check_cancelled!
+          outcome = if @searcher.respond_to?(:call_with_status)
+            @searcher.call_with_status(query:, max_results: 5)
+          else
+            Fetchers::WebSearcher::Outcome.new(results: @searcher.call(query:, max_results: 5), status: "success")
+          end
+          check_cancelled!
+          @result.fetch("searches") << { "query" => query, "status" => outcome.status,
+            "error_code" => outcome.error_code, "attempt" => attempt + 1 }
+          progress(stage)
+          if outcome.status == "success"
+            successful += 1
+            results = outcome.results.first(5)
+            break
+          end
+          break unless outcome.error_code.in?(%w[timeout unavailable])
+        end
+        results
       end
-      # Spend the bounded reading budget across queries, including queries for
-      # contrary evidence, rather than only reading the first query's results.
+      raise SearchUnavailable if successful.zero? && documents.empty?
       pages.map(&:size).max.to_i.times.flat_map { |index| pages.filter_map { |page| page[index] } }.uniq(&:url)
     end
 

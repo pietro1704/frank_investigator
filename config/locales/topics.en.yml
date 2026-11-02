@@ -58,6 +58,7 @@ en:
       reading_evidence: "Reading evidence sources"
       classifying: "Identifying news and original publications"
     errors:
+      search_unavailable: "The search service failed or blocked access. This is not a finding that no relevant news exists."
       enqueue_failed: "The queue is temporarily unavailable. Delivery will be attempted again."
       interrupted: "Processing was interrupted. You can start a new attempt."
       usage_limit: "The account reached its usage limit. Check your allowance before trying again."
