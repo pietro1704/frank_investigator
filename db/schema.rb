@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_26_230000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_220000) do
   create_table "article_claims", force: :cascade do |t|
     t.integer "article_id", null: false
     t.integer "claim_id", null: false
@@ -511,6 +511,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_26_230000) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "topic_analysis_links", force: :cascade do |t|
+    t.integer "topic_investigation_id", null: false
+    t.integer "investigation_id"
+    t.string "run_token", null: false
+    t.string "source_id", null: false
+    t.string "source_url", null: false
+    t.string "status", default: "pending", null: false
+    t.string "error_code"
+    t.json "report_snapshot", default: {}, null: false
+    t.datetime "checked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["investigation_id"], name: "index_topic_analysis_links_on_investigation_id"
+    t.index ["topic_investigation_id", "run_token", "source_id"], name: "idx_topic_analysis_source", unique: true
+    t.index ["topic_investigation_id"], name: "index_topic_analysis_links_on_topic_investigation_id"
+  end
+
   create_table "topic_investigations", force: :cascade do |t|
     t.text "question", null: false
     t.string "slug", null: false
@@ -573,5 +590,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_26_230000) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "topic_analysis_links", "investigations", on_delete: :nullify
+  add_foreign_key "topic_analysis_links", "topic_investigations", on_delete: :cascade
   add_foreign_key "verdict_snapshots", "claim_assessments"
 end
