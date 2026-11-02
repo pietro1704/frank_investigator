@@ -128,6 +128,22 @@ class TopicInvestigationsControllerTest < ActionDispatch::IntegrationTest
     assert_nil response.headers["Retry-After"]
   end
 
+  test "consolidated subquestions display their verdicts and literal source citations" do
+    root = Rails.root.join("test/fixtures/files/topic_assessment")
+    discovery = JSON.parse(File.read(root.join("input.json")))
+    report = JSON.parse(File.read(root.join("report.json")))
+    raw = JSON.parse(File.read(root.join("synthesis_response.json")))
+    model = Object.new
+    model.define_singleton_method(:synthesize) { |input:| raw }
+    result = Investigations::TopicSynthesis.call(discovery:, report:, model:)
+    topic = TopicInvestigation.create!(question: discovery["question"], discovery:, report: result, status: :completed, finished_at: Time.current)
+    get topic_investigation_path(topic)
+    assert_response :success
+    assert_select "[data-subquestion-id='Q1']", count: 1
+    assert_select "[data-subquestion-id='Q1'] blockquote", count: raw["sections"].first["evidence"].size
+    assert_select "[data-subquestion-id='Q1'] a[target='_blank']", count: raw["sections"].first["evidence"].size
+  end
+
   test "stored question source titles and model text are escaped" do
     topic = completed_topic
     payload = topic.discovery.deep_dup

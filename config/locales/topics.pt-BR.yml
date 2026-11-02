@@ -54,6 +54,7 @@ pt-BR:
       failed: "Não foi possível concluir a investigação."
       cancelled: "Investigação cancelada."
     stages:
+      synthesizing: "Consolidando respostas por subpergunta"
       planning: "Planejando a pesquisa"
       searching_news: "Buscando notícias"
       reading_news: "Lendo as notícias"
@@ -86,3 +87,6 @@ pt-BR:
       insufficient: "Faltam evidências originais pertinentes para concluir se a afirmação central está correta. Repetição de notícias ou a própria matéria citando a si mesma não bastam."
       conflict: "As evidências originais incluem uma contradição. Não cabe um veredito definitivo; compare as evidências e seus recortes."
       opinion: "Esta afirmação é um juízo de valor, não um fato diretamente verificável."
+
+  topic_synthesis:
+    scope_mismatch: "As evidências disponíveis não correspondem à população, ao território, ao período ou à medida necessários para esta conclusão. Um resultado restrito não comprova a afirmação mais ampla."
