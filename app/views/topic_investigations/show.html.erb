@@ -17,6 +17,7 @@
       <% end %>
     </details>
   <% end %>
+  <%= render "coverage", coverage: TopicCoveragePresenter.call(@topic) %>
   <% if @notice %><p role="alert" class="mb-4"><%= @notice %></p><% end %>
   <% if active %>
     <section role="status" class="border border-line rounded-2xl p-5">

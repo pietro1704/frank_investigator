@@ -1,5 +1,17 @@
 pt-BR:
   topics:
+    coverage:
+      heading: "Cobertura da pesquisa"
+      partial: "Resultado parcial: faltam matérias, posições editoriais ou análises completas solicitadas. Essa limitação não confirma nem refuta a pergunta."
+      requested: "%{count} matérias solicitadas"
+      counts: "Selecionadas: %{selected}; analisadas: %{analyzed}; pendentes: %{pending}; falhas ou desatualizadas: %{failed}; não lidas: %{unread}."
+      quota: "%{side}: solicitadas %{requested}, selecionadas %{selected}, analisadas %{analyzed}, faltantes %{missing}."
+      statuses:
+        not_requested: "Análise completa não solicitada neste relatório histórico"
+        pending: "Aguardando análise"
+        ready: "Análise disponível"
+        failed: "Falha na análise"
+        stale: "Análise desatualizada"
     full_scope: "Pesquisa com análises completas das notícias e avaliação consolidada baseada nas fontes. Análises e evidências ausentes permanecem como limitações explícitas."
     full_report: "Ler análise completa da notícia"
     research_plan: "Recorte da pesquisa"

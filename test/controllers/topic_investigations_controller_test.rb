@@ -121,6 +121,7 @@ class TopicInvestigationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     data = response.parsed_body
     assert_equal true, data.fetch("ready")
+    assert_equal 0, data.dig("coverage", "pending")
     refute data.fetch("report").key?("model_result")
     assert data.fetch("sources").all? { |item| !item.key?("body") }
     refute data.key?("run_token")
@@ -142,6 +143,27 @@ class TopicInvestigationsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-subquestion-id='Q1']", count: 1
     assert_select "[data-subquestion-id='Q1'] blockquote", count: raw["sections"].first["evidence"].size
     assert_select "[data-subquestion-id='Q1'] a[target='_blank']", count: raw["sections"].first["evidence"].size
+  end
+
+  test "terminal partial HTML and JSON share coverage without polling or private provenance" do
+    topic = completed_topic
+    plan = Investigations::TopicPlan.call(JSON.parse(file_fixture("topic_discovery/structured_plan.json").read))
+    topic.update!(discovery: topic.discovery.merge("plan" => plan),
+      report: topic.report.merge("full_analyses" => [ { "source_id" => "S1", "status" => "ready", "evidence_documents" => [ { "body" => "PRIVATE" } ] } ]))
+    get topic_investigation_path(topic, format: :json)
+    assert_response :ok
+    data = response.parsed_body
+    assert data["terminal"]
+    assert data["report_available"]
+    refute data["ready"]
+    refute data.dig("coverage", "complete")
+    assert_equal plan, data["plan"]
+    assert_nil response.headers["Retry-After"]
+    refute_includes response.body, "PRIVATE"
+    get topic_investigation_path(topic)
+    assert_select "[data-partial-result]", count: 1
+    assert_select "[data-topic-coverage][data-complete='false']", count: 1
+    assert_select "meta[http-equiv='refresh']", count: 0
   end
 
   test "stored question source titles and model text are escaped" do

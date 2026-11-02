@@ -1,12 +1,12 @@
 module Investigations
   # Sampling diversity is independent of truth and article quality.
   class TopicSourceSelection
-    def self.call(documents:, relevant_ids:, editorial_counts:)
-      new(documents:, relevant_ids:, editorial_counts:).call
+    def self.call(documents:, relevant_ids:, editorial_counts:, news_count: 0)
+      new(documents:, relevant_ids:, editorial_counts:, news_count:).call
     end
 
-    def initialize(documents:, relevant_ids:, editorial_counts:)
-      @documents, @relevant_ids, @counts = documents, relevant_ids, editorial_counts
+    def initialize(documents:, relevant_ids:, editorial_counts:, news_count: 0)
+      @documents, @relevant_ids, @counts, @news_count = documents, relevant_ids, editorial_counts, news_count
     end
 
     def call
@@ -20,7 +20,7 @@ module Investigations
           independent << document
         end
       end
-      requested = @counts.values.sum
+      requested = @news_count.positive? ? @news_count : @counts.values.sum
       target = requested.positive? ? requested : TopicDiscovery::MAX_NEWS_PAGES
       selected = []
       missing = @counts.dup
@@ -30,7 +30,7 @@ module Investigations
         missing[side] = count - matches.size
       end
       uncertain = independent.reject { |item| item["editorial_confidence"] == "documented" && TopicPlan::SIDES.include?(item["editorial_position"]) }
-      extras = requested.positive? ? uncertain : independent
+      extras = @counts.values.sum.positive? ? uncertain : independent
       selected.concat(extras.reject { |item| selected.include?(item) }.first([ target - selected.size, 0 ].max))
       { "news_ids" => selected.pluck("id"), "requested" => target, "missing" => missing,
         "uncertain_ids" => uncertain.pluck("id"), "excluded" => excluded,

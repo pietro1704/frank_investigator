@@ -63,6 +63,14 @@ class Investigations::TopicDiscoveryResearchModelTest < ActiveSupport::TestCase
     assert_equal 8, result.dig("requirements", "ambiguities").size
   end
 
+  test "preserves the live observed overall count in the provider schema" do
+    @payloads["topic_research_plan"] = fixture("counted_plan")
+    result = Investigations::TopicPlan.call(@client.plan(question: "O que é fascismo? Busque três notícias."))
+    assert_equal 3, result.dig("requirements", "news_count")
+    schema = @requests.last.dig("response_format", "json_schema", "schema", "properties", "requirements")
+    assert_includes schema["required"], "news_count"
+  end
+
   test "classifies editorial uncertainty using the live observed response shape" do
     @payloads["topic_document_kinds"] = fixture("structured_classification")
     result = @client.classify(question: "Amazônia", documents: fixture("documents"))

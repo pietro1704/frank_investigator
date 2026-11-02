@@ -23,6 +23,18 @@ class Investigations::TopicPlanTest < ActiveSupport::TestCase
     assert_raises(Investigations::TopicDiscovery::InvalidResponse) { Investigations::TopicPlan.call(plan) }
   end
 
+  test "explicit total quantity accepts live response and rejects contradictory quotas" do
+    plan = JSON.parse(file_fixture("topic_discovery/counted_plan.json").read)
+    assert_equal 3, Investigations::TopicPlan.call(plan).dig("requirements", "news_count")
+    [ -1, 13, "3", nil ].each do |count|
+      plan["requirements"]["news_count"] = count
+      assert_raises(Investigations::TopicDiscovery::InvalidResponse) { Investigations::TopicPlan.call(plan) }
+    end
+    plan["requirements"]["news_count"] = 3
+    plan["requirements"]["editorial_counts"]["left"] = 2
+    assert_raises(Investigations::TopicDiscovery::InvalidResponse) { Investigations::TopicPlan.call(plan) }
+  end
+
   test "unbounded malformed or foreign fields fail closed" do
     base = { "scope" => "Brazil", "news_queries" => [ "schools" ], "evidence_queries" => [ "data" ] }
     [ base.merge("unexpected" => true), base.merge("scope" => ""), base.merge("news_queries" => [ "x" * 301 ]) ].each do |plan|

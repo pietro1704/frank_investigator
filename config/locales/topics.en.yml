@@ -1,5 +1,17 @@
 en:
   topics:
+    coverage:
+      heading: "Research coverage"
+      partial: "Partial result: some requested articles, editorial positions or full analyses are missing. This limitation does not establish whether the question is true or false."
+      requested: "%{count} articles requested"
+      counts: "Selected: %{selected}; analyzed: %{analyzed}; pending: %{pending}; failed or stale: %{failed}; unread: %{unread}."
+      quota: "%{side}: requested %{requested}, selected %{selected}, analyzed %{analyzed}, missing %{missing}."
+      statuses:
+        not_requested: "Full analysis not requested in this historical report"
+        pending: "Awaiting analysis"
+        ready: "Analysis available"
+        failed: "Analysis failed"
+        stale: "Analysis out of date"
     full_scope: "Research with full article analyses and a source-grounded consolidated assessment. Missing analyses and evidence remain explicit limitations."
     full_report: "Read full article analysis"
     research_plan: "Research scope"
