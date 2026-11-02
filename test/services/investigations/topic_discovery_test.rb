@@ -97,6 +97,85 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
     refute result.key?("verdict"), "retrieval alone must never produce a factual assessment"
   end
 
+  test "one invalid source screen retries the same read documents without repeating retrieval" do
+    model = @model
+    original = model.method(:screen)
+    attempts = []
+    model.define_singleton_method(:screen) do |**arguments|
+      attempts << arguments.deep_dup
+      payload = original.call(**arguments)
+      payload["reviews"].first["scope_quote"] = "This quotation is absent from the read source." if attempts.size == 1
+      payload
+    end
+    result = discover
+    assert_equal "discovered", result["status"]
+    assert_equal 1, result["screening_retries"]
+    assert_equal 2, attempts.size
+    assert_equal attempts.first, attempts.last
+    assert_equal @fetcher.calls.uniq, @fetcher.calls
+  end
+
+  test "two invalid screens remain a failure and never hand off unvalidated sources" do
+    @model.responses[:screen]["reviews"].first["id"] = "S999"
+    snapshots = []
+    assert_raises(Investigations::TopicDiscovery::InvalidResponse) do
+      discover(on_progress: ->(_, snapshot) { snapshots << snapshot })
+    end
+    assert_equal 2, @model.calls.count { |stage, _| stage == :screen }
+    assert_equal 1, snapshots.last["screening_retries"]
+    assert_empty snapshots.last["news_ids"]
+    refute @model.calls.any? { |stage, _| stage == :classify }
+  end
+
+  test "cancellation after an invalid screen prevents a second model call" do
+    cancelled = false
+    model = @model
+    original = model.method(:screen)
+    model.define_singleton_method(:screen) do |**arguments|
+      payload = original.call(**arguments)
+      payload["reviews"].first["id"] = "S999"
+      cancelled = true
+      payload
+    end
+    assert_raises(Investigations::TopicDiscovery::Cancelled) { discover(cancelled: -> { cancelled }) }
+    assert_equal 1, @model.calls.count { |stage, _| stage == :screen }
+  end
+
+  test "the single retry budget is shared across structured screening rounds" do
+    @responses[:plan] = fixture("structured_plan").merge("news_queries" => %w[first second], "evidence_queries" => [ "evidence" ])
+    docs = fixture("documents").first(7)
+    candidates = docs.map { |item| item.slice("url", "title").merge("snippet" => "") }
+    @searcher = Searcher.new({ "first" => candidates.first(5), "second" => candidates.drop(5) })
+    attempts = 0
+    @model.define_singleton_method(:screen) do |documents:, **|
+      attempts += 1
+      payload = { "reviews" => documents.map { |item| { "id" => item["id"], "relevant" => true, "reason" => "Requested captured subject", "scope_quote" => item["body"][0, 70] } }, "evidence_queries" => [] }
+      payload["reviews"].first["id"] = "S999" if attempts.odd?
+      payload
+    end
+    @model.define_singleton_method(:classify) do |documents:, **|
+      { "documents" => documents.map { |item| { "id" => item["id"], "kind" => "news_article", "reason" => "Individual source", "quote" => item["body"][0, 70] } } }
+    end
+    assert_raises(Investigations::TopicDiscovery::InvalidResponse) { discover }
+    assert_equal 3, attempts, "A later round must not receive a fresh retry allowance"
+    assert_equal 7, @fetcher.calls.size
+  end
+
+  test "time exhaustion after invalid screening prevents the retry" do
+    model = @model
+    original = model.method(:screen)
+    service = nil
+    model.define_singleton_method(:screen) do |**arguments|
+      payload = original.call(**arguments)
+      payload["reviews"].first["id"] = "S999"
+      service.instance_variable_set(:@deadline, 0)
+      payload
+    end
+    service = Investigations::TopicDiscovery.new(question: QUESTION, model: @model, searcher: @searcher, fetcher: @fetcher)
+    assert_raises(Investigations::TopicDiscovery::BudgetExceeded) { service.call }
+    assert_equal 1, @model.calls.count { |stage, _| stage == :screen }
+  end
+
   test "failed searches are retried once recorded and never treated as no news" do
     @searcher.define_singleton_method(:call_with_status) do |query:, max_results:|
       @calls << query
