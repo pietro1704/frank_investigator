@@ -38,7 +38,7 @@ class TopicInvestigationsController < ApplicationController
 
   def restart
     @topic = TopicInvestigation.find_by!(slug: params[:id])
-    Investigations::SubmitTopic.restart(topic: @topic)
+    Investigations::SubmitTopic.restart(topic: @topic, fresh: params[:fresh] == "1")
     redirect_to topic_investigation_path(@topic), status: :see_other
   rescue Investigations::SubmitTopic::Conflict
     conflict
@@ -55,11 +55,13 @@ class TopicInvestigationsController < ApplicationController
     { slug: @topic.slug, question: @topic.question, status: @topic.status, stage: @topic.stage,
       ready: @topic.completed? && coverage.fetch("complete"), terminal: !active?,
       report_available: @topic.completed? && @topic.report.present?, coverage:,
+      synthesis_progress: @topic.synthesis_progress, resumable: @topic.resumable?,
       plan: @topic.discovery["plan"], error_code: @topic.error_code,
       started_at: @topic.started_at, finished_at: @topic.finished_at,
       report: public_report,
       sources: Array(@topic.discovery["documents"]).map { |item| item.slice("id", "title", "url", "kind", "fetched_at", "truncated") },
-      failures: Array(@topic.discovery["failures"]) }
+      failures: Array(@topic.discovery["failures"]),
+      editorial_profiles: @topic.discovery.fetch("editorial_profiles", {}).values }
   end
 
   def public_report

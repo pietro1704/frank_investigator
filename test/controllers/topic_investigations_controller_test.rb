@@ -166,6 +166,21 @@ class TopicInvestigationsControllerTest < ActionDispatch::IntegrationTest
     assert_select "meta[http-equiv='refresh']", count: 0
   end
 
+  test "saved synthesis progress is public but raw checkpoints and generation identities stay private" do
+    topic = completed_topic
+    topic.update!(status: :failed, error_code: "synthesis_timeout", assessment_checkpoint: { "run_token" => topic.run_token,
+      "report" => { "model_result" => "PRIVATE_CHECKPOINT" }, "synthesis" => { "sections" => { "Q1" => {} } } })
+    get topic_investigation_path(topic, format: :json)
+    assert_response :ok
+    assert_equal 1, response.parsed_body.dig("synthesis_progress", "completed")
+    refute_includes response.body, "PRIVATE_CHECKPOINT"
+    refute_includes response.body, topic.run_token
+    refute response.parsed_body.key?("assessment_checkpoint")
+    get topic_investigation_path(topic)
+    assert_select "[data-synthesis-progress]", count: 1
+    assert_select "meta[http-equiv='refresh']", count: 0
+  end
+
   test "stored question source titles and model text are escaped" do
     topic = completed_topic
     payload = topic.discovery.deep_dup

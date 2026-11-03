@@ -7,8 +7,9 @@ module Investigations
       new(discovery:, report:, **options).call
     end
 
-    def initialize(discovery:, report:, model: ResearchModel.new, cancelled: -> { false })
+    def initialize(discovery:, report:, model: ResearchModel.new, cancelled: -> { false }, checkpoint: {}, on_progress: ->(*) { })
       @discovery, @report, @model, @cancelled = discovery.deep_dup, report.deep_dup, model, cancelled
+      @checkpoint, @on_progress = checkpoint.deep_dup, on_progress
     end
 
     def call
@@ -20,23 +21,36 @@ module Investigations
       questions = [ @discovery.fetch("question") ] if questions.empty?
       raise InvalidResponse unless questions.size.between?(1, 6) && questions.all? { |question| question.is_a?(String) }
       questions = questions.each_with_index.map { |question, index| { "question_id" => "Q#{index + 1}", "question" => question } }
-      documents = corpus
+      documents = TopicEvidenceCorpus.call(@discovery, supplemental: true)
       @documents = documents.index_by { |item| item.fetch("id") }
-      raw = @model.synthesize(input: { "question" => @discovery.fetch("question"), "scope" => @discovery.fetch("scope"),
-        "subquestions" => questions, "documents" => documents, "article_assessments" => @report.fetch("articles"),
-        "full_analyses" => @discovery.fetch("full_analyses", []).map { |item| item.except("evidence_documents") },
-        "requirements" => @discovery.dig("plan", "requirements"), "coverage" => @discovery["selection"] })
-      check_cancelled!
-      object!(raw, %w[question sections limitations])
-      raise InvalidResponse unless raw["question"] == @discovery.fetch("question")
-      strings!(raw["limitations"])
-      sections = raw["sections"]
-      raise InvalidResponse unless sections.is_a?(Array) && sections.all? { |item| item.is_a?(Hash) && item["question_id"].is_a?(String) } &&
-        sections.pluck("question_id").sort == questions.pluck("question_id").sort
-      by_id = sections.index_by { |item| item.fetch("question_id") }
-      guarded = questions.map do |question|
-        section = by_id.fetch(question.fetch("question_id")).deep_dup
-        validate_section!(section)
+      context = { "question" => @discovery.fetch("question"), "scope" => @discovery.fetch("scope"),
+        "documents" => documents, "article_assessments" => @report.fetch("articles").map { |item|
+          item.slice("source_id", "verdict", "overall_quality").merge("conclusion" => item["conclusion"].to_s.first(1200))
+        },
+        "full_analyses" => @discovery.fetch("full_analyses", []).map { |item| item.slice("source_id", "status", "slug", "conclusion") },
+        "requirements" => @discovery.dig("plan", "requirements"), "coverage" => @discovery["selection"] }
+      fingerprint = TopicResearchFingerprint.call(context.merge("subquestions" => questions, "assessment_provenance" => @report["articles"]))
+      unless @checkpoint["version"] == 1 && @checkpoint["fingerprint"] == fingerprint && @checkpoint["sections"].is_a?(Hash)
+        @checkpoint = { "version" => 1, "fingerprint" => fingerprint, "sections" => {} }
+      end
+      @checkpoint["sections"].slice!(*questions.pluck("question_id"))
+      entries = questions.map do |question|
+        check_cancelled!
+        saved = @checkpoint["sections"][question["question_id"]]
+        if saved
+          validate_section!(saved.fetch("section"))
+          raise InvalidResponse unless saved.dig("section", "question_id") == question["question_id"]
+          strings!(saved.fetch("limitations"))
+        else
+          publish_progress!
+          saved = generate_section(context, question)
+          @checkpoint["sections"][question["question_id"]] = saved
+          publish_progress!
+        end
+        saved
+      end
+      guarded = entries.zip(questions).map do |entry, question|
+        section = entry.fetch("section").deep_dup
         section["question"] = question.fetch("question")
         verdict = guarded_verdict(section)
         if verdict != section["verdict"]
@@ -55,29 +69,42 @@ module Investigations
         section["verdict"] = verdict
         section
       end
-      limitations = (@report.fetch("limitations", []) + raw.fetch("limitations")).uniq
+      limitations = (@report.fetch("limitations", []) + entries.flat_map { |entry| entry.fetch("limitations") }).uniq
       limitations << I18n.t("topic_assessment.truncated") if documents.any? { |item| item["truncated"] }
       check_cancelled!
       @report.merge("sections" => guarded, "conclusion" => guarded.map { |item| "#{item['question']}\n#{item['conclusion']}" }.join("\n\n"),
         "limitations" => limitations.uniq, "synthesis_sources" => documents.map { |item| item.slice("id", "title", "url", "kind", "fetched_at", "truncated") },
-        "model_result" => { "article_assessment" => @report["model_result"], "synthesis" => raw })
+        "model_result" => { "article_assessment" => @report["model_result"], "synthesis" => entries.map { |entry| entry.fetch("section") } })
     end
 
     private
 
-    def corpus
-      documents = @discovery.fetch("documents").deep_dup
-      extra = @discovery.fetch("full_analyses", []).select { |item| item["status"] == "ready" }.flat_map { |item| Array(item["evidence_documents"]) }
-      seen = documents.pluck("url").to_set
-      extra.first(48).each do |item|
-        next if seen.include?(item["url"])
-        break if documents.size >= 40
-        documents << item.deep_dup
-        seen.add(item.fetch("url"))
+    def generate_section(context, question)
+      input = context.merge("subquestions" => [ question ])
+      2.times do |attempt|
+        check_cancelled!
+        publish_progress!
+        raw = @model.synthesize(input: input.deep_dup)
+        check_cancelled!
+        begin
+          object!(raw, %w[question sections limitations])
+          raise InvalidResponse unless raw["question"] == @discovery["question"]
+          strings!(raw["limitations"])
+          sections = raw["sections"]
+          raise InvalidResponse unless sections.is_a?(Array) && sections.size == 1 && sections.first.is_a?(Hash) && sections.first["question_id"] == question["question_id"]
+          validate_section!(sections.first)
+          return { "section" => sections.first, "limitations" => raw["limitations"] }
+        rescue InvalidResponse => error
+          raise if attempt == 1
+          input["validation_feedback"] = "Validation error: #{error.message}. The previous response failed source, literal-quotation, length or question identity validation. Return only the requested question_id. Cite only the supplied document IDs, copy contiguous literal passages, and use no evidence when none applies."
+        end
       end
-      raise InvalidResponse unless documents.size.between?(1, 40) && documents.all? { |item| item.is_a?(Hash) && item["id"].is_a?(String) && item["body"].is_a?(String) } &&
-        documents.pluck("id").uniq.size == documents.size
-      documents
+    end
+
+    def publish_progress!
+      check_cancelled!
+      @on_progress.call(@checkpoint.deep_dup)
+      check_cancelled!
     end
 
     def object!(value, keys)
@@ -85,7 +112,7 @@ module Investigations
     end
 
     def text!(value, max: 2000, min: 1)
-      raise InvalidResponse unless value.is_a?(String) && value.strip.length.between?(min, max)
+      raise InvalidResponse, "text_length_expected_#{min}_to_#{max}" unless value.is_a?(String) && value.strip.length.between?(min, max)
     end
 
     def strings!(value)

@@ -26,6 +26,8 @@ class TopicCoveragePresenter
         valid ? link.status : "pending"
       end
       { "source_id" => document["id"], "title" => document["title"], "url" => document["url"],
+        "editorial_position" => document.fetch("editorial_position", "unknown"),
+        "editorial_evidence" => editorial_evidence(document),
         "status" => status, "analysis_slug" => (link.investigation&.slug if valid),
         "error_code" => (link.error_code if valid) }
     end
@@ -46,5 +48,14 @@ class TopicCoveragePresenter
       "failed" => sources.count { |item| item["status"].in?(%w[failed stale]) },
       "unread" => Array(discovery["failures"]).size, "editorial_quotas" => quotas,
       "complete" => complete, "sources" => sources }
+  end
+  private
+
+  def editorial_evidence(document)
+    evidence = Array(document.dig("editorial_profile", "evidence")).deep_dup
+    if document["editorial_quote"].present?
+      evidence << { "url" => document["url"], "quote" => document["editorial_quote"], "relation" => "article_self_description", "checked_at" => document["fetched_at"] }
+    end
+    evidence
   end
 end

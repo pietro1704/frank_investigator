@@ -12,7 +12,11 @@ module Investigations
     def call
       excluded = []
       independent = []
-      @documents.each do |document|
+      candidates = @documents
+      if @counts.values.sum.positive?
+        candidates = candidates.sort_by { |item| item["editorial_confidence"] == "documented" && @counts.fetch(item["editorial_position"], 0).positive? ? 0 : 1 }
+      end
+      candidates.each do |document|
         next unless document["kind"] == "news_article" && @relevant_ids.include?(document["id"])
         if independent.any? { |other| same_origin?(document, other) }
           excluded << { "id" => document.fetch("id"), "reason" => "same_origin" }
@@ -44,7 +48,7 @@ module Investigations
     end
 
     def origin(document)
-      host = URI.parse(document.fetch("url")).host.to_s.downcase
+      host = TopicEditorialProfiles.publisher_key(URI.parse(document.fetch("url")).host)
       MediaOwnershipGroup.group_for_host(host)&.name || Sources::ProfileRegistry.match(host)&.independence_group || host
     end
 

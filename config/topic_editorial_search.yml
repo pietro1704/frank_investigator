@@ -1,0 +1,27 @@
+# Search hints only. Orientation is established from read profile evidence, never from this list.
+right:
+  - host: revistaoeste.com
+    profile_url: https://revistaoeste.com/sobre-a-oeste/
+  - host: gazetadopovo.com.br
+    profile_url: https://www.gazetadopovo.com.br/quem-somos/
+    profile_urls: [https://mediabiasfactcheck.com/gazeta-do-povo/]
+left:
+  - host: brasildefato.com.br
+    profile_url: https://www.brasildefato.com.br/quem-somos/
+  - host: brasil247.com
+    profile_url: https://www.brasil247.com/quem-somos
+center:
+  - host: reuters.com
+    language: en
+    profile_url: https://www.allsides.com/news-source/reuters-media-bias
+    profile_urls: [https://mediabiasfactcheck.com/reuters/]
+  - host: csmonitor.com
+    name: Christian Science Monitor
+    language: en
+    profile_url: https://www.allsides.com/news-source/christian-science-monitor
+    profile_urls: [https://mediabiasfactcheck.com/christian-science-monitor/]
+  - host: bbc.com
+    language: en
+    aliases: [bbc.co.uk]
+    profile_url: https://www.allsides.com/news-source/bbc-news-media-bias
+    profile_urls: [https://mediabiasfactcheck.com/bbc/]
