@@ -17,7 +17,9 @@ module Investigations
     def call
       validate_input!
       check_cancelled!
-      raw = @model.assess(discovery: @discovery.deep_dup)
+      input = @discovery.deep_dup
+      input["full_analyses"]&.each { |item| item.delete("evidence_documents") }
+      raw = @model.assess(discovery: input)
       check_cancelled!
       object!(raw, %w[question conclusion limitations articles])
       raise InvalidResponse unless raw.fetch("question") == @discovery.fetch("question")

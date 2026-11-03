@@ -19,6 +19,8 @@ module Investigations
           Assess the central factual assertion, quoting it literally in article_quote (15–2000
           characters from that article's body or title). Explain contextual omissions and remaining
           unverifiable details; supported means the central assertion, not every sentence, is supported.
+          Cite only source IDs from the top-level documents list. Full-analysis summaries
+          provide context, not additional citable documents or proof of their conclusions.
           Each evidence item must quote an exact contiguous body passage (20–2000 characters)
           from a supplied document, with its existing source_id. Use external documents rather
           than the news article citing itself. Index/catalog pages are not evidence documents.
