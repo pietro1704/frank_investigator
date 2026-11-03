@@ -43,7 +43,7 @@ class Investigations::TopicAssessmentTest < ActiveSupport::TestCase
     original = @input.deep_dup
     result = assess
     input = @model.inputs.sole
-    assert_equal @input["documents"], input["documents"]
+    assert_equal @input["documents"].reject { |item| item["kind"] == "index_or_other" }, input["documents"]
     assert input["full_analyses"].all? { |item| !item.key?("evidence_documents") }
     assert input["full_analyses"].all? { |item| item["conclusion"] == "Current full analysis" }
     refute_includes input.to_json, "A711"

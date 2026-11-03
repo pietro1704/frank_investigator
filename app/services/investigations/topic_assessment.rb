@@ -18,6 +18,7 @@ module Investigations
       validate_input!
       check_cancelled!
       input = @discovery.deep_dup
+      input["documents"] = TopicEvidenceCorpus.call(@discovery)
       input["full_analyses"]&.each { |item| item.delete("evidence_documents") }
       raw = @model.assess(discovery: input)
       check_cancelled!

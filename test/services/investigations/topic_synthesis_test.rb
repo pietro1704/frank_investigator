@@ -8,7 +8,11 @@ class Investigations::TopicSynthesisTest < ActiveSupport::TestCase
     @report = { "question" => @input.fetch("question"), "articles" => @input.fetch("article_assessments"), "model_result" => {} }
     @model = Object.new
     raw = @raw
-    @model.define_singleton_method(:synthesize) { |input:| raw.deep_dup }
+    @model.define_singleton_method(:synthesize) do |input:|
+      payload = raw.deep_dup
+      payload["sections"].select! { |section| input["subquestions"].pluck("question_id").include?(section["question_id"]) } if payload["sections"].size > 1
+      payload
+    end
   end
 
   def synthesize(**options)
@@ -22,6 +26,65 @@ class Investigations::TopicSynthesisTest < ActiveSupport::TestCase
     assert_equal @input.fetch("question"), result.fetch("sections").sole.fetch("question")
     assert result.fetch("synthesis_sources").all? { |item| item["url"].present? && !item.key?("body") }
     assert result.fetch("conclusion").present?
+  end
+
+  test "only citable documents are exposed and URL aliases retain their actual identifiers" do
+    source = @discovery["documents"].first
+    alias_source = source.merge("id" => "A711")
+    @discovery["full_analyses"] = [ { "status" => "ready", "evidence_documents" => [ alias_source ] } ]
+    raw = @raw
+    @model.define_singleton_method(:synthesize) do |input:|
+      raise "Ineligible index exposed to model" if input["documents"].any? { |item| item["kind"] == "index_or_other" }
+      raise "Actual supplemental identity lost to URL deduplication" unless input["documents"].pluck("id").include?("A711")
+      raw.deep_dup
+    end
+    result = synthesize
+    assert_includes result["synthesis_sources"].pluck("id"), "A711"
+    refute result["synthesis_sources"].any? { |item| item["kind"] == "index_or_other" }
+  end
+
+  test "a rejected citation is regenerated once and every returned citation is validated" do
+    raw = @raw
+    inputs = []
+    @model.define_singleton_method(:synthesize) do |input:|
+      inputs << input
+      response = raw.deep_dup
+      response["sections"].first["evidence"].first["source_id"] = "unread" if inputs.size == 1
+      response
+    end
+    assert synthesize["sections"].any?
+    assert_equal 2, inputs.size
+    assert inputs.last["validation_feedback"].present?
+    assert_equal inputs.first["documents"], inputs.last["documents"]
+  end
+
+  test "timeouts keep validated questions and resume only the missing question" do
+    @discovery["plan"] = { "requirements" => { "subquestions" => [ "First question", "Second question" ] } }
+    raw = @raw
+    calls = []
+    timeout = true
+    @model.define_singleton_method(:synthesize) do |input:|
+      id = input["subquestions"].sole["question_id"]
+      calls << id
+      raise Timeout::Error if id == "Q2" && timeout
+      raw.deep_dup.tap { |payload| payload["sections"].first["question_id"] = id }
+    end
+    saved = nil
+    assert_raises(Timeout::Error) { synthesize(on_progress: ->(checkpoint) { saved = checkpoint }) }
+    assert_equal [ "Q1" ], saved["sections"].keys
+    timeout = false
+    result = synthesize(checkpoint: saved)
+    assert_equal %w[Q1 Q2 Q2], calls
+    assert_equal %w[Q1 Q2], result["sections"].pluck("question_id")
+    @discovery["documents"].first["body"] += " Additional source context."
+    synthesize(checkpoint: saved)
+    assert_equal %w[Q1 Q2], calls.last(2), "Changed evidence must invalidate completed question caches"
+  end
+
+  test "conflicting supplemental identities fail instead of replacing an existing source" do
+    original = @discovery["documents"].first
+    @discovery["full_analyses"] = [ { "status" => "ready", "evidence_documents" => [ original.merge("body" => "A different article under the same ID") ] } ]
+    assert_raises(Investigations::TopicAssessment::InvalidResponse) { synthesize }
   end
 
   test "mismatched populations territories periods or metrics veto definitive support" do

@@ -65,7 +65,7 @@ module Investigations
       read(candidates, role: "evidence", limit: MAX_EVIDENCE_PAGES)
 
       progress("classifying")
-      classification = @model.classify(question: @question, documents: documents.deep_dup)
+      classification = @model.classify(question: @question, documents: documents.map { |item| item.except("editorial_profile", "editorial_position", "editorial_confidence", "editorial_reason", "editorial_quote") }.deep_dup)
       validate_classification!(classification)
       @result["classification"] = classification
       kinds = classification.fetch("documents").index_by { |item| item.fetch("id") }
@@ -82,11 +82,23 @@ module Investigations
 
     def structured_discovery(plan)
       progress("searching_news")
-      candidates = search(plan.fetch("news_queries"), stage: "searching_news")
+      candidates = search(TopicEditorialProfiles.queries(plan), stage: "searching_news")
       attempts = ENV.fetch("FRANK_TOPIC_NEWS_ATTEMPTS", 24).to_i.clamp(6, 24)
       screen = nil
       relevant_ids = []
-      candidates.first(attempts).each_slice(6) do |batch|
+      resolver = nil
+      if plan.dig("requirements", "editorial_counts").values.sum.positive? && @model.respond_to?(:editorial_profile)
+        resolver = TopicEditorialProfiles.new(model: @model, fetcher: @fetcher, on_progress: lambda {
+          @result["editorial_profiles"] = resolver.profiles.deep_dup
+          progress("profiling_editorial")
+        })
+      end
+      remaining = candidates.first(attempts)
+      until remaining.empty?
+        if resolver && @result["selection"]
+          remaining = remaining.sort_by { |candidate| resolver.priority(candidate, @result["selection"]["missing"]) }
+        end
+        batch = remaining.shift(6)
         read(batch, role: "news", limit: 6)
         next if documents.empty?
         progress("screening")
@@ -94,6 +106,7 @@ module Investigations
         @result["screen"] = screen
         relevant_ids = screen.fetch("reviews").select { |item| item.fetch("relevant") }.pluck("id")
         classify_documents!
+        documents.each { |document| resolver.enrich(document) } if resolver
         select_documents!(relevant_ids, plan)
         break if @result.dig("selection", "coverage_complete")
       end
@@ -103,6 +116,7 @@ module Investigations
       evidence = search(queries, stage: "searching_evidence")
       read(evidence, role: "evidence", limit: 8, successful_limit: MAX_EVIDENCE_PAGES)
       classify_documents!
+      documents.each { |document| resolver.enrich(document) } if resolver
       select_documents!(relevant_ids, plan)
       @result["status"] = @result.fetch("news_ids").any? ? "discovered" : "no_news"
       progress("classifying")
@@ -123,12 +137,13 @@ module Investigations
 
     def classify_documents!
       progress("classifying")
-      classification = @model.classify(question: @question, documents: documents.deep_dup)
+      classification = @model.classify(question: @question, documents: documents.map { |item| item.except("editorial_profile", "editorial_position", "editorial_confidence", "editorial_reason", "editorial_quote") }.deep_dup)
       validate_classification!(classification)
       @result["classification"] = classification
       by_id = classification.fetch("documents").index_by { |item| item.fetch("id") }
       documents.each do |document|
         item = by_id.fetch(document.fetch("id"))
+        document.delete("editorial_profile")
         document.merge!(item.slice("kind", "editorial_position", "editorial_confidence", "editorial_reason", "editorial_quote"))
       end
     end
@@ -217,7 +232,8 @@ module Investigations
             check_cancelled!
             documents << { "id" => "S#{documents.size + 1}", "url" => url, "title" => parsed.title,
               "body" => parsed.body_text.to_s.first(MAX_BODY_LENGTH), "fetched_at" => Time.current.iso8601,
-              "truncated" => parsed.body_text.to_s.length > MAX_BODY_LENGTH, "candidate_role" => role }
+              "truncated" => parsed.body_text.to_s.length > MAX_BODY_LENGTH, "candidate_role" => role,
+              "publisher_pages" => TopicEditorialProfiles.publisher_pages(snapshot.html, url) }
           end
         rescue UrlNormalizer::InvalidUrlError
           attempts += 1

@@ -11,6 +11,16 @@
     <% coverage["sources"].each do |source| %>
       <li data-analysis-source="<%= source['source_id'] %>">
         <%= source["title"] %> — <%= t("topics.coverage.statuses.#{source['status']}") %>
+        <% if source["editorial_evidence"].any? %>
+          <details data-editorial-evidence><summary><%= t("topics.editorial_profile", side: t("topics.sides.#{source['editorial_position']}")) %></summary>
+            <% source["editorial_evidence"].each do |evidence| %>
+              <p><%= t("topics.profile_relations.#{evidence['relation']}") %></p>
+              <blockquote><%= evidence["quote"] %></blockquote>
+              <% if (checked_at = topic_profile_checked_at(evidence["checked_at"])) %><p><%= t("topics.profile_checked", date: l(checked_at, format: :long)) %></p><% end %>
+              <% if (url = topic_source_url(evidence["url"])) %><%= link_to t("topics.read_profile"), url, target: "_blank", rel: "noopener noreferrer" %><% end %>
+            <% end %>
+          </details>
+        <% end %>
         <% if source["analysis_slug"].present? %><%= link_to t("topics.full_report"), investigation_path(source["analysis_slug"]), class: "underline" %><% end %>
         <% if source["error_code"].present? %><span><%= t("topics.errors.analysis_incomplete") %></span><% end %>
       </li>

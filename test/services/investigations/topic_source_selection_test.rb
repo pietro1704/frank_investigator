@@ -18,6 +18,15 @@ class Investigations::TopicSourceSelectionTest < ActiveSupport::TestCase
     assert result["coverage_complete"]
   end
 
+  test "a documented candidate is retained ahead of uncertain coverage from the same owner" do
+    unknown = source("S1", "unknown", confidence: "unknown")
+    known = source("S2", "left").merge("url" => unknown["url"] + "-followup")
+    result = select_sources([ unknown, known ], { "left" => 1, "center" => 0, "right" => 0 })
+    assert_equal [ "S2" ], result["news_ids"]
+    assert result["coverage_complete"]
+    assert_equal [ "S1" ], result["excluded"].pluck("id")
+  end
+
   test "quotas use documented positions only and do not substitute primary evidence" do
     docs = [ source("S1", "left"), source("S2", "center", confidence: "provisional"), source("S3", "right"), source("S4", "center") ]
     docs << source("S5", "center").merge("kind" => "producer_publication")

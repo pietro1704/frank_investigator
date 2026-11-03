@@ -6,7 +6,7 @@ class TopicInvestigation < ApplicationRecord
 
   LEASE_FOR = 5.minutes
   ACTIVE_STATUSES = %w[queued researching awaiting_assessment assessing awaiting_analyses monitoring_analyses].freeze
-  DISCOVERY_STAGES = %w[planning searching_news reading_news screening searching_evidence reading_evidence classifying].freeze
+  DISCOVERY_STAGES = %w[planning searching_news reading_news screening searching_evidence reading_evidence classifying profiling_editorial].freeze
 
   enum :status, {
     queued: "queued", researching: "researching", awaiting_assessment: "awaiting_assessment",
@@ -76,9 +76,30 @@ class TopicInvestigation < ApplicationRecord
       lease_token: nil, lease_expires_at: nil, finished_at: Time.current, updated_at: Time.current) == 1
   end
 
-  def checkpoint_assessment!(run_token:, lease_token:, stage:)
+  def checkpoint_assessment!(run_token:, lease_token:, stage:, checkpoint: nil)
     raise InvalidReport unless stage.in?(%w[assessing synthesizing])
-    execution_scope(run_token:, lease_token:, phase: "assessing").update_all(stage:, lease_expires_at: LEASE_FOR.from_now, updated_at: Time.current) == 1
+    attributes = { stage:, lease_expires_at: LEASE_FOR.from_now, updated_at: Time.current }
+    attributes[:assessment_checkpoint] = checkpoint if checkpoint
+    execution_scope(run_token:, lease_token:, phase: "assessing").update_all(attributes) == 1
+  end
+
+  def resumable?
+    return false unless status.in?(%w[failed cancelled]) && full_analysis_required? && discovery["status"] == "discovered"
+    ids = Array(discovery["news_ids"])
+    return false if ids.empty? || ids.uniq != ids
+    documents = Array(discovery["documents"]).index_by { |item| item["id"] }
+    links = topic_analysis_links.for_run(run_token).includes(:investigation).to_a
+    links.pluck(:source_id).sort == ids.sort && links.all? do |link|
+      link.investigation&.normalized_url == link.source_url && documents[link.source_id]&.fetch("url", nil) == link.source_url
+    end
+  end
+
+  def synthesis_progress
+    state = assessment_checkpoint
+    sections = state.dig("synthesis", "sections")
+    completed = state["run_token"] == run_token && sections.is_a?(Hash) ? sections.size : 0
+    total = Array(discovery.dig("plan", "requirements", "subquestions")).size
+    { "completed" => completed, "total" => [ total, 1 ].max }
   end
 
   def full_analysis_required?
@@ -138,5 +159,6 @@ class TopicInvestigation < ApplicationRecord
   def payloads_are_objects
     errors.add(:discovery, :invalid) unless discovery.is_a?(Hash)
     errors.add(:report, :invalid) unless report.is_a?(Hash)
+    errors.add(:assessment_checkpoint, :invalid) unless assessment_checkpoint.is_a?(Hash)
   end
 end

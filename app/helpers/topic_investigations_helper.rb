@@ -5,4 +5,9 @@ module TopicInvestigationsHelper
   rescue URI::InvalidURIError
     nil
   end
+  def topic_profile_checked_at(value)
+    Time.iso8601(value.to_s)
+  rescue ArgumentError
+    nil
+  end
 end
