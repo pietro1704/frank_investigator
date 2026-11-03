@@ -4,13 +4,14 @@ class Investigations::TopicAssessmentTest < ActiveSupport::TestCase
   FIXTURES = Rails.root.join("test/fixtures/files/topic_assessment")
 
   class Model
-    attr_reader :calls
+    attr_reader :calls, :inputs
     attr_accessor :after_call, :error, :response
     def initialize(response)
-      @response, @calls = response, 0
+      @response, @calls, @inputs = response, 0, []
     end
     def assess(discovery:)
       @calls += 1
+      @inputs << discovery.deep_dup
       raise error if error
       after_call&.call
       response.deep_dup
@@ -31,6 +32,31 @@ class Investigations::TopicAssessmentTest < ActiveSupport::TestCase
     assert_equal @raw, result.fetch("model_result")
     assert result.fetch("assessed_at").present?
     assert result.fetch("articles").all? { |item| item["evidence_ids"].is_a?(Array) }
+  end
+
+  test "article assessment receives only its accepted document corpus while synthesis provenance stays intact" do
+    @input["analysis_phase_complete"] = true
+    supplemental = { "id" => "A711", "body" => "Supplemental source reserved for guarded consolidated synthesis.", "title" => "Supplemental original", "kind" => "producer_publication" }
+    @input["full_analyses"] = @input["news_ids"].map do |id|
+      { "source_id" => id, "status" => "ready", "slug" => "report", "conclusion" => "Current full analysis", "evidence_documents" => [ supplemental.deep_dup ] }
+    end
+    original = @input.deep_dup
+    result = assess
+    input = @model.inputs.sole
+    assert_equal @input["documents"], input["documents"]
+    assert input["full_analyses"].all? { |item| !item.key?("evidence_documents") }
+    assert input["full_analyses"].all? { |item| item["conclusion"] == "Current full analysis" }
+    refute_includes input.to_json, "A711"
+    assert_equal original, @input
+    assert_equal @input["full_analyses"], result["full_analyses"], "Later synthesis must retain the actually read supplemental evidence"
+  end
+
+  test "article assessment rejects supplemental citations outside its discovery corpus" do
+    @input["analysis_phase_complete"] = true
+    source = { "id" => "A711", "body" => "An original supplemental passage outside the discovery corpus." }
+    @input["full_analyses"] = @input["news_ids"].map { |id| { "source_id" => id, "status" => "ready", "evidence_documents" => [ source ] } }
+    supported_article["evidence"] << { "source_id" => source["id"], "quote" => source["body"], "relationship" => "supports", "primary_reason" => "Original producer of the specific record." }
+    assert_raises(Investigations::TopicAssessment::InvalidResponse) { assess }
   end
 
   test "missing full analyses cannot be ratified by the brief model assessment" do
