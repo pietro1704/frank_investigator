@@ -1,0 +1,5 @@
+<nav aria-label="<%= t('report_exports.downloads') %>" class="flex flex-wrap items-center gap-3 my-5" data-report-downloads>
+  <span class="text-sm font-semibold"><%= t("report_exports.downloads") %></span>
+  <%= link_to t("report_exports.pdf"), pdf_url, data: { turbo: false }, class: "px-4 py-2 border border-line rounded-xl text-sm font-semibold underline" %>
+  <%= link_to t("report_exports.epub"), epub_url, data: { turbo: false }, class: "px-4 py-2 border border-line rounded-xl text-sm font-semibold underline" %>
+</nav>

@@ -1,0 +1,22 @@
+pt-BR:
+  report_exports:
+    downloads: "Baixar relatório"
+    pdf: "Baixar PDF"
+    epub: "Baixar EPUB"
+    topic_title: "Investigação por assunto"
+    answer: "Resposta à pergunta"
+    contents: "Sumário"
+    summary: "Conclusão e avaliação geral"
+    article_title: "Investigação de notícia"
+    honest_headline: "Título ajustado às evidências"
+    sources: "Fontes e referências"
+    date: "Relatório de %{date}"
+    online_report: "Abrir relatório online"
+    partial: "Relatório com cobertura parcial ou evidências aguardando atualização. Consulte as limitações e os vereditos de cada ponto."
+    scope: "Este documento reúne os resultados salvos da investigação. Qualidade editorial e veredito factual são dimensões distintas. Evidência insuficiente não significa falsidade. A exportação não realizou novas buscas nem verificações."
+    source_scope: "Referências citadas ou vinculadas no relatório. A presença nesta lista não significa que uma fonte tenha sido lida ou que comprove uma afirmação; consulte as evidências e ressalvas de cada ponto."
+    no_summary: "Não há conclusão geral salva. Consulte as afirmações verificadas e suas limitações."
+    errors:
+      unfinished: "O relatório ainda não está concluído. Volte à investigação para acompanhar o andamento."
+      unavailable: "Não foi possível gerar o PDF agora. Tente novamente em instantes; o relatório permanece disponível."
+      too_large: "Este relatório excede o limite de tamanho para exportação. O conteúdo completo permanece disponível na página da investigação."

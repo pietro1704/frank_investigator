@@ -1,0 +1,13 @@
+<% if points.empty? %><p><%= t("topics.answer.empty_#{group}") %></p><% end %>
+<% points.each do |point| %>
+  <h3><%= point["claim"] %></h3>
+  <p><strong><%= t("topics.verdicts.#{point['verdict']}", default: point["verdict"]) %></strong></p>
+  <p><%= point["conclusion"] %></p>
+  <ul><% point["limitations"].each do |text| %><li><%= text %></li><% end %></ul>
+  <% point["citations"].each do |source| %>
+    <h4><%= source["title"] %></h4>
+    <p><%= t("topics.relationships.#{source['relationship']}") %></p>
+    <blockquote><%= source["quote"] %></blockquote>
+    <p><%= link_to source["url"], source["url"] %></p>
+  <% end %>
+<% end %>

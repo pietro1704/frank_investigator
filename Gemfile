@@ -79,3 +79,6 @@ end
 gem "tailwindcss-rails", "~> 4.6"
 
 gem "ferrum", "~> 0.19.1"
+
+# EPUB archives are generated offline in the production runtime.
+gem "rubyzip", "~> 3.7"
