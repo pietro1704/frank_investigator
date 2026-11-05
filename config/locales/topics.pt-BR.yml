@@ -1,5 +1,16 @@
 pt-BR:
   topics:
+    comparison:
+      heading: "Compare as notícias investigadas"
+      scope: "Afirmações, períodos ou enquadramentos diferentes não são automaticamente contradições factuais. Compare cada afirmação com as evidências citadas. Fontes compartilhadas e repetição entre veículos não estabelecem independência nem verdade."
+      claim: "Afirmação central"
+      evidence: "Evidências utilizadas"
+      factual_challenge: "Contestação factual: uma fonte original contesta esta afirmação."
+      no_factual_challenge: "Não se estabeleceu contradição factual fundamentada para esta afirmação."
+      shared: "Evidências compartilhadas: %{ids}. O reaproveitamento não conta como confirmação independente."
+      editorial: "Enquadramento e lacunas apontados pela avaliação"
+      editorial_scope: "Observações editoriais baseadas nas evidências listadas aqui. São distintas do veredito factual e não demonstram omissão intencional."
+      no_editorial: "Não há observação editorial com evidência vinculada disponível."
     answer:
       known: "O que sabemos"
       disputed: "O que está em disputa"
