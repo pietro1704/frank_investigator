@@ -1,0 +1,31 @@
+<section class="my-8" data-topic-comparison>
+  <h2 class="font-serif text-2xl font-bold mb-3"><%= t("topics.comparison.heading") %></h2>
+  <p class="text-sm text-muted mb-4"><%= t("topics.comparison.scope") %></p>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <% rows.each do |row| %>
+      <section class="min-w-0 break-words border border-line rounded-xl p-4" data-comparison-source="<%= row['source_id'] %>">
+        <h3 class="font-bold"><%= row["title"] %></h3>
+        <% if (url = topic_source_url(row["url"])) %><p class="underline text-sm my-2"><%= link_to t("topics.original"), url, target: "_blank", rel: "noopener noreferrer" %></p><% end %>
+        <h4 class="font-semibold mt-3"><%= t("topics.comparison.claim") %></h4>
+        <blockquote class="border-l-4 border-line pl-3 my-2"><%= row["claim"] %></blockquote>
+        <p><span class="<%= badge_class_for(row['verdict']) %>"><%= t("topics.verdicts.#{row['verdict']}") %></span></p>
+        <p class="mt-2"><%= row["conclusion"] %></p>
+        <p class="font-semibold text-sm my-3" data-factual-challenge="<%= row['factual_challenge'] %>"><%= t(row["factual_challenge"] ? "topics.comparison.factual_challenge" : "topics.comparison.no_factual_challenge") %></p>
+        <h4 class="font-semibold mt-3"><%= t("topics.comparison.evidence") %></h4>
+        <% if row["citations"].empty? %><p class="text-sm"><%= t("topics.no_evidence") %></p><% end %>
+        <% row["citations"].each do |cite| %>
+          <div class="mt-3 text-sm" data-comparison-citation="<%= cite['source_id'] %>">
+            <p><%= cite["source_id"] %> — <%= t("topics.relationships.#{cite['relationship']}") %></p>
+            <% if (url = topic_source_url(cite["url"])) %><p class="underline"><%= link_to cite["title"], url, target: "_blank", rel: "noopener noreferrer" %></p><% end %>
+            <blockquote class="border-l-4 border-line pl-3"><%= cite["quote"] %></blockquote>
+          </div>
+        <% end %>
+        <% if row["shared_source_ids"].any? %><p class="mt-3 text-sm text-muted"><%= t("topics.comparison.shared", ids: row["shared_source_ids"].join(", ")) %></p><% end %>
+        <h4 class="font-semibold mt-4"><%= t("topics.comparison.editorial") %></h4>
+        <p class="text-xs text-muted"><%= t("topics.comparison.editorial_scope") %></p>
+        <% if row["editorial_observations"].empty? %><p class="text-sm mt-2"><%= t("topics.comparison.no_editorial") %></p><% end %>
+        <ul class="list-disc pl-5 text-sm mt-2"><% row["editorial_observations"].each do |text| %><li><%= text %></li><% end %></ul>
+      </section>
+    <% end %>
+  </div>
+</section>

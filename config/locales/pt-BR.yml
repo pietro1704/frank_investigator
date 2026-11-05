@@ -44,6 +44,7 @@ pt-BR:
       opensource_body_html: 'O código-fonte completo do Frank Investigator está publicamente disponível sob a <a href="https://github.com/akitaonrails/frank_investigator" target="_blank" rel="noopener" class="underline hover:text-ink">Licença Pública Geral Affero GNU v3.0</a>. Qualquer pessoa pode inspecionar, auditar, reproduzir ou melhorar a metodologia de análise.'
 
     methodology:
+      topics_comparison: "Afirmações, períodos ou enquadramentos diferentes não são automaticamente contradições factuais. Compare cada afirmação com as evidências citadas. Fontes compartilhadas e repetição entre veículos não estabelecem independência nem verdade. Observações editoriais baseadas nas evidências listadas aqui. São distintas do veredito factual e não demonstram omissão intencional."
       topics_answer: "O relatório por assunto abre com O que sabemos, O que está em disputa e O que falta comprovar. Os pontos reutilizam avaliações e citações literais de fontes lidas; evidência original e recorte aplicável condicionam o bloco de fatos sustentados. Relatórios breves antigos usam a mesma apresentação."
       topics_recovery: "As substituições e buscas adicionais têm limites; a falta de fontes originais e as páginas não lidas são limitações, não evidência de falsidade. Uma rodada adicional busca documentos originais e possíveis contradições. Limites globais: 28 tentativas de busca, 36 de leitura e 28 documentos de até 14.000 caracteres; o prazo também interrompe operações em andamento."
       topics_heading: "Investigação por assunto"

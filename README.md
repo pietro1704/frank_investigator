@@ -22,6 +22,8 @@ A fact does not become false because a million sources repeat a falsehood, and a
 
 ## What It Does
 
+- **Article comparison:** Responsive cards compare central assertions, guarded verdicts, literal evidence and editorial observations. Factual challenges require a read original disputing the specific assertion. Shared evidence is disclosed without independence claims; editorial gaps do not imply deliberate omission.
+
 - **Answer first:** Topic reports open with what we know, what is disputed and what remains to be proven. Points link to literal read evidence; ungrounded or inapplicable support cannot populate known facts. Historical brief reports remain compatible.
 
 - **Topic analysis provenance:** Per-run source links can share full URL investigations through the existing durable submission service without moving reports between groups. Source identities are unique within a research generation; cancellation does not delete shared investigations.

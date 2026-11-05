@@ -1,5 +1,16 @@
 en:
   topics:
+    comparison:
+      heading: "Compare the investigated articles"
+      scope: "Different claims, periods or framing are not automatically factual contradictions. Compare each assertion with its cited evidence. Shared sources and repeated coverage do not establish independence or truth."
+      claim: "Central assertion"
+      evidence: "Evidence used"
+      factual_challenge: "Factual challenge: an original source disputes this assertion."
+      no_factual_challenge: "No grounded factual contradiction was established for this assertion."
+      shared: "Shared evidence: %{ids}. Reuse does not count as independent confirmation."
+      editorial: "Framing and gaps identified by the assessment"
+      editorial_scope: "Editorial observations based on the evidence listed here. They are distinct from the factual verdict and do not establish intentional omission."
+      no_editorial: "No evidence-linked editorial observation is available."
     answer:
       known: "What we know"
       disputed: "What is disputed"

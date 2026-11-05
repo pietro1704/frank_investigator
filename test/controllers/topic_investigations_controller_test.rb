@@ -142,6 +142,19 @@ class TopicInvestigationsControllerTest < ActionDispatch::IntegrationTest
     refute_includes JSON.generate(response.parsed_body["answer"]), '"body"'
   end
 
+  test "comparison shows each selected article with verifiable references and no inferred independence" do
+    topic = completed_topic
+    get topic_investigation_path(topic)
+    assert_response :success
+    assert_select "[data-topic-comparison] [data-comparison-source]", count: 2
+    assert_select "[data-comparison-source='S2'] [data-comparison-citation='S1'] a", count: 1
+    assert_select "[data-topic-comparison] [data-factual-challenge='true']", count: 0
+    assert_includes response.body, "Reuse does not count as independent confirmation"
+    get topic_investigation_path(topic, format: :json)
+    assert_equal %w[S2 S4], response.parsed_body["comparison"].pluck("source_id")
+    refute_includes JSON.generate(response.parsed_body["comparison"]), '"body"'
+  end
+
   test "consolidated subquestions display their verdicts and literal source citations" do
     root = Rails.root.join("test/fixtures/files/topic_assessment")
     discovery = JSON.parse(File.read(root.join("input.json")))
