@@ -1,5 +1,6 @@
 pt-BR:
   topics:
+    retrieval_budget: "Tentativas de leitura: %{attempts}/%{max_attempts}; até %{max_pages} documentos. Prazo da descoberta: %{seconds} segundos. Páginas não lidas não demonstram falsidade."
     coverage:
       heading: "Cobertura da pesquisa"
       partial: "Resultado parcial: faltam matérias, posições editoriais ou análises completas solicitadas. Essa limitação não confirma nem refuta a pergunta."
@@ -107,6 +108,7 @@ pt-BR:
       insufficient_text: "Não havia texto de artigo legível disponível"
       fetch_failed: "Não foi possível acessar a fonte"
   topic_assessment:
+    retrieval_limited: "As substituições e buscas adicionais têm limites; a falta de fontes originais e as páginas não lidas são limitações, não evidência de falsidade."
     adjusted: "Leia os vereditos individuais abaixo. Algumas conclusões foram limitadas porque as evidências originais disponíveis não sustentam uma avaliação definitiva."
     unreadable: "Algumas fontes não puderam ser lidas. Seus títulos e trechos de busca não foram usados como evidência factual."
     truncated: "Algumas fontes longas foram verificadas por um recorte; detalhes fora desse trecho permanecem sem verificação."

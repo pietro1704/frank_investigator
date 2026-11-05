@@ -1,5 +1,6 @@
 en:
   topics:
+    retrieval_budget: "Reading attempts: %{attempts}/%{max_attempts}; up to %{max_pages} documents. Discovery deadline: %{seconds} seconds. Unread pages do not establish falsity."
     coverage:
       heading: "Research coverage"
       partial: "Partial result: some requested articles, editorial positions or full analyses are missing. This limitation does not establish whether the question is true or false."
@@ -107,6 +108,7 @@ en:
       insufficient_text: "No readable article text was available"
       fetch_failed: "The source could not be accessed"
   topic_assessment:
+    retrieval_limited: "Replacement and additional searches are bounded; missing originals and unreadable pages remain limitations, not evidence of falsity."
     adjusted: "Read the individual verdicts below. Some conclusions were limited because the available original evidence does not support a definitive assessment."
     unreadable: "Some sources could not be read. Their titles and search snippets were not used as factual evidence."
     truncated: "Some long sources were checked using an excerpt; details outside that excerpt remain unverified."

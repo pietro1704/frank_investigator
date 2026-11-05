@@ -94,6 +94,9 @@
       <% if @topic.resumable? %><%= button_to t("topics.fresh_research"), restart_topic_investigation_path(@topic, fresh: "1"), method: :post, class: "mt-3 underline" %><% end %>
     <% end %>
   <% end %>
+  <% if (budget = @topic.discovery["budget"]).present? %>
+    <p class="mt-6 text-sm text-muted" data-retrieval-budget><%= t("topics.retrieval_budget", attempts: budget["read_attempts"], max_attempts: budget["max_read_attempts"], max_pages: budget["max_read_pages"], seconds: budget["seconds"]) %></p>
+  <% end %>
   <% if Array(@topic.discovery["failures"]).any? %>
     <details class="mt-8"><summary class="cursor-pointer font-semibold"><%= t("topics.unreadable_sources") %></summary>
       <ul class="mt-3 space-y-3 text-sm"><% @topic.discovery["failures"].each do |item| %><li><%= item["url"] %> — <%= t("topics.source_errors.#{item['reason']}", default: t("topics.source_errors.fetch_failed")) %></li><% end %></ul>
