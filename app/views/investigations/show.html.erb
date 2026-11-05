@@ -17,6 +17,9 @@
       <%= t(".view_original") %>
     </a>
   </header>
+  <% if @investigation.completed? %>
+    <%= render "shared/report_downloads", pdf_url: export_investigation_path(@investigation, format: :pdf), epub_url: export_investigation_path(@investigation, format: :epub) %>
+  <% end %>
 
   <% if @failure_info.present? %>
     <section class="border border-line bg-verdict-red/4 rounded-3xl p-5 mb-4 border-l-4 border-l-verdict-red">

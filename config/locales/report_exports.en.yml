@@ -1,0 +1,22 @@
+en:
+  report_exports:
+    downloads: "Download report"
+    pdf: "Download PDF"
+    epub: "Download EPUB"
+    topic_title: "Topic investigation"
+    answer: "Answer to the question"
+    contents: "Contents"
+    summary: "Conclusion and overall quality"
+    article_title: "Article investigation"
+    honest_headline: "Evidence-based headline"
+    sources: "Sources and references"
+    date: "Report dated %{date}"
+    online_report: "Open online report"
+    partial: "Partial coverage or evidence awaiting an update. Read the limitations and verdicts for each point."
+    scope: "This document contains the investigation's saved results. Editorial quality and factual verdict are separate. Insufficient evidence does not mean falsity. Exporting performs no new searches or verification."
+    source_scope: "References cited or linked in the report. Inclusion does not mean a source was read or proves an assertion; consult the evidence and limitations for each point."
+    no_summary: "No overall conclusion is saved. Read the checked assertions and their limitations."
+    errors:
+      unfinished: "This report has not finished. Return to the investigation to follow its progress."
+      unavailable: "The PDF could not be generated now. Try again shortly; the report remains available."
+      too_large: "This report exceeds the export size limit. The full content remains available on the investigation page."

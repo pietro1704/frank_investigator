@@ -1,0 +1,9 @@
+<% sources = {} %>
+<% assessments.each do |assessment| %>
+  <% assessment.evidence_items.each do |item| %><% sources[item.source_url] ||= item.article&.title.presence || item.source_url %><% end %>
+<% end %>
+<% investigation.root_article&.sourced_links&.includes(:target_article)&.order(:position)&.each do |link| %>
+  <% sources[link.href] ||= link.target_article&.title.presence || link.anchor_text.presence || link.href %>
+<% end %>
+<p><%= t("report_exports.source_scope") %></p>
+<ol><% sources.each do |url, title| %><li><strong><%= title %></strong><p><%= link_to url, url %></p></li><% end %></ol>

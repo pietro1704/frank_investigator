@@ -37,3 +37,7 @@ end
 Rack::Attack.blocklisted_responder = lambda do |req|
   [ 403, { "Content-Type" => "text/plain" }, [ "This URL is not allowed.\n" ] ]
 end
+
+Rack::Attack.throttle("report_exports/ip/minute", limit: 6, period: 60.seconds) do |req|
+  req.ip if req.get? && req.path.match?(%r{\A/(?:investigations|topic_investigations)/[^/]+/export\.(?:pdf|epub)\z})
+end

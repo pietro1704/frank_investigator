@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   # Public report pages — read-only, no auth required
   resources :investigations, only: [ :show ] do
     member do
+      get :export, to: "report_exports#article"
       get :graph_data
     end
   end
@@ -30,6 +31,7 @@ Rails.application.routes.draw do
 
   resources :topic_investigations, only: [ :new, :create, :show ] do
     member do
+      get :export, to: "report_exports#topic"
       post :deepen_article
       post :cancel
       post :restart

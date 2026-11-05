@@ -1,0 +1,29 @@
+/* Self-contained book typography; no network fonts, app controls or fixed grids. */
+body { font-family: Georgia, "Times New Roman", serif; font-size: 1em; line-height: 1.55; margin: 1.2em; }
+h1, h2, h3, h4, h5, h6 { font-family: sans-serif; line-height: 1.25; text-align: left; break-after: avoid; }
+h1 { font-size: 1.8em; margin: 1.4em 0 .8em; }
+h2 { font-size: 1.3em; margin-top: 1.6em; }
+h3, h4 { font-size: 1.1em; margin-top: 1.2em; }
+p, li, blockquote { orphans: 3; widows: 3; overflow-wrap: anywhere; word-wrap: break-word; }
+p { white-space: pre-line; }
+a { text-decoration: underline; overflow-wrap: anywhere; word-wrap: break-word; }
+blockquote { border-left: .2em solid #8793a1; margin: 1em 0 1em .3em; padding-left: 1em; font-size: .95em; white-space: pre-line; }
+ul, ol { padding-left: 1.5em; }
+li { margin: .4em 0; }
+dl { margin: 1em 0; }
+dt { font-weight: bold; }
+dd { margin: .2em 0 .8em 1em; }
+.cover { padding-top: 2em; }
+.brand { font-family: sans-serif; letter-spacing: .12em; text-transform: uppercase; font-size: .85em; }
+.notice { padding: 1em; border: 1px solid #8793a1; font-weight: bold; }
+.question { font-size: 1.2em; line-height: 1.5; }
+.source-url { font-size: .85em; overflow-wrap: anywhere; word-wrap: break-word; }
+.contents li { margin-bottom: .7em; }
+@media print {
+  @page { size: A4; margin: 22mm 20mm; }
+  body { margin: 0; color: #17202b; font-size: 10.5pt; }
+  .cover { min-height: 190mm; }
+  .cover h1 { font-size: 25pt; }
+  .contents, .chapter { break-before: page; }
+  a { color: #17202b; }
+}

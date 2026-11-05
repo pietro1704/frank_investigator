@@ -1,0 +1,14 @@
+<p><%= topic.report["scope"] %></p>
+<p><%= t("topics.brief_scope") unless topic.full_analysis_required? %></p>
+<p><%= t("topics.coverage.counts", selected: coverage["selected"], analyzed: coverage["analyzed"], pending: coverage["pending"], failed: coverage["failed"], unread: coverage["unread"]) %></p>
+<% coverage["editorial_quotas"].each do |side, quota| %>
+  <% next unless quota["requested"].positive? %>
+  <p><%= t("topics.coverage.quota", side: t("topics.sides.#{side}"), requested: quota["requested"], selected: quota["selected"], analyzed: quota["analyzed"], missing: quota["missing"]) %></p>
+<% end %>
+<ul><% Array(topic.report["limitations"]).each do |text| %><li><%= text %></li><% end %></ul>
+<% if Array(topic.discovery["failures"]).any? %>
+  <h2><%= t("topics.unreadable_sources") %></h2>
+  <ul><% topic.discovery["failures"].each do |item| %>
+    <li><%= item["url"] %> — <%= t("topics.source_errors.#{item['reason']}", default: t("topics.source_errors.fetch_failed")) %></li>
+  <% end %></ul>
+<% end %>

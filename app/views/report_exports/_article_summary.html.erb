@@ -1,0 +1,8 @@
+<p><%= link_to investigation.normalized_url, investigation.normalized_url %></p>
+<% if investigation.honest_headline.present? %>
+  <h2><%= t("report_exports.honest_headline") %></h2>
+  <p><%= investigation.honest_headline %></p>
+<% end %>
+<%= render "investigations/editorial_summary", summary: investigation.llm_summary %>
+<% if investigation.llm_summary.blank? %><p><%= t("report_exports.no_summary") %></p><% end %>
+<p><%= t("report_exports.scope") %></p>

@@ -1,0 +1,20 @@
+<p><%= link_to row["url"], row["url"] %></p>
+<p><strong><%= t("topics.article_quality") %>:</strong> <%= t("investigations.investigation_summary.quality_#{row['overall_quality']}") %></p>
+<h2><%= t("topics.comparison.claim") %></h2>
+<blockquote><%= row["claim"] %></blockquote>
+<p><strong><%= t("topics.verdicts.#{row['verdict']}") %></strong></p>
+<p><%= row["conclusion"] %></p>
+<% %w[strengths weaknesses].each do |key| %>
+  <h2><%= t("investigations.investigation_summary.#{key}") %></h2>
+  <ul><% Array(item[key]).each do |text| %><li><%= text %></li><% end %></ul>
+<% end %>
+<h2><%= t("topics.comparison.evidence") %></h2>
+<% if row["citations"].empty? %><p><%= t("topics.no_evidence") %></p><% end %>
+<% row["citations"].each do |cite| %>
+  <h3><%= cite["title"] %></h3>
+  <p><%= t("topics.relationships.#{cite['relationship']}") %></p>
+  <blockquote><%= cite["quote"] %></blockquote>
+  <p><%= link_to cite["url"], cite["url"] %></p>
+<% end %>
+<% if row["shared_source_ids"].any? %><p><%= t("topics.comparison.shared", ids: row["shared_source_ids"].join(", ")) %></p><% end %>
+<p><%= t("topics.comparison.editorial_scope") %></p>

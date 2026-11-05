@@ -1,0 +1,6 @@
+<% answer.each do |group, points| %>
+  <section>
+    <h2><%= t("topics.answer.#{group}") %></h2>
+    <%= render "report_exports/answer", group:, points: %>
+  </section>
+<% end %>

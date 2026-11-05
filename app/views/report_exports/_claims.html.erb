@@ -1,0 +1,26 @@
+<% if assessments.empty? %><p><%= t("investigations.show.no_checkable_claims") %></p><% end %>
+<% assessments.each do |assessment| %>
+  <h2><%= assessment.claim.canonical_text %></h2>
+  <p><strong><%= te(:verdict, assessment.verdict) %></strong> — <%= te(:checkability_status, assessment.checkability_status) %></p>
+  <% if assessment.claim.time_scope.present? %><p><%= assessment.claim.time_scope %></p><% end %>
+  <div><%= render_reason_summary(assessment.reason_summary) %></div>
+  <% if assessment.missing_evidence_summary.present? %><p><strong><%= t("investigations.claim_assessment.missing_evidence") %></strong> <%= assessment.missing_evidence_summary %></p><% end %>
+  <% if assessment.stale_at.present? %><p><%= t("investigations.claim_assessment.stale") %> — <%= assessment.staleness_reason %></p><% end %>
+  <% if assessment.primary_vetoed? %><p><%= t("investigations.claim_assessment.primary_vetoed_detail") %></p><% end %>
+  <% if assessment.unsubstantiated_viral? %><p><%= t("investigations.claim_assessment.unsubstantiated_viral_detail") %></p><% end %>
+  <% if assessment.checkability_checkable? %>
+    <dl>
+      <dt><%= t("investigations.claim_assessment.confidence") %></dt><dd><%= score_percent(assessment.confidence_score.to_f * 100) %></dd>
+      <% %w[authority independence timeliness conflict citation_depth].each do |key| %>
+        <dt><%= t("investigations.claim_assessment.#{key}") %></dt><dd><%= score_percent(assessment.public_send("#{key}_score").to_f * 100) %></dd>
+      <% end %>
+    </dl>
+  <% end %>
+  <% if assessment.disagreement_details.present? %><h3><%= t("investigations.claim_assessment.disagreement") %></h3><p><%= assessment.disagreement_details %></p><% end %>
+  <% assessment.evidence_items.each do |item| %>
+    <h3><%= item.article&.title.presence || item.source_url %></h3>
+    <p><%= te(:stance, item.stance) %></p>
+    <% if item.excerpt.present? %><blockquote><%= item.excerpt %></blockquote><% end %>
+    <p><%= link_to item.source_url, item.source_url %></p>
+  <% end %>
+<% end %>
