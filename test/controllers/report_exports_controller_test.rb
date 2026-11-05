@@ -1,5 +1,6 @@
 require "test_helper"
 require "zip"
+require "ferrum"
 
 class ReportExportsControllerTest < ActionDispatch::IntegrationTest
   setup do
@@ -59,9 +60,16 @@ class ReportExportsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "PDF downloads are actual paginated documents for both report identities" do
-    [ "/investigations/#{@investigation.slug}/export.pdf", "/topic_investigations/#{@topic.slug}/export.pdf" ].each do |path|
-      assert_no_enqueued_jobs { get path }
-      assert_response :success
+    paths = [ "/investigations/#{@investigation.slug}/export.pdf", "/topic_investigations/#{@topic.slug}/export.pdf" ]
+    (paths * 5).each do |path|
+      diagnostics = []
+      trace = TracePoint.new(:raise) do |event|
+        error = event.raised_exception
+        diagnostics << "#{error.class}: #{error.message}" if error.is_a?(Ferrum::Error) || error.is_a?(Timeout::Error)
+        diagnostics << "Unavailable; renderer_owned=#{ReportExports::Pdf::LOCK.owned?}" if error.is_a?(ReportExports::Pdf::Unavailable)
+      end
+      trace.enable { assert_no_enqueued_jobs { get path } }
+      assert_response :success, "[DEBUG-export-ci] #{diagnostics.last(3).join(' | ')}"
       assert_equal "application/pdf", response.media_type
       assert response.body.b.start_with?("%PDF-")
       assert response.body.b.rstrip.end_with?("%%EOF")
