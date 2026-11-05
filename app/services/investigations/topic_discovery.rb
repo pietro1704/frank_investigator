@@ -143,14 +143,14 @@ module Investigations
     # One bounded round, aimed at missing originals and possible counter-evidence.
     # A producer label is a retrieval signal, never proof of a claim.
     def replenish_evidence!(plan, screen)
-      return unless @result["producer_ids"].empty? ||
-        @result["failures"].any? || @result.dig("selection", "coverage_complete") == false
+      return if @result["news_ids"].empty?
       @result["additional_evidence_rounds"] = 1
       progress("searching_evidence")
       used = @result["searches"].pluck("query")
       queries = (Array(screen&.fetch("evidence_queries")) + plan.fetch("evidence_queries")).reject { |query| used.include?(query) }
-      queries += Array(screen&.fetch("evidence_queries")).map { |query| "#{query.first(220)} original document corrections contradictory evidence" }
-      queries << "#{@question.first(220)} original data corrections contradictory evidence"
+      bases = Array(screen&.fetch("evidence_queries")).presence || plan.fetch("evidence_queries")
+      suffix = " original document corrections contradictory evidence"
+      queries += bases.map { |query| query.length + suffix.length <= 300 ? query + suffix : query }
       candidates = search(queries.uniq.first(2), stage: "searching_evidence")
       previous_size = documents.size
       read(candidates, role: "evidence", limit: 4, successful_limit: 2)
