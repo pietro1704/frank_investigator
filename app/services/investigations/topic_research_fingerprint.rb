@@ -1,5 +1,9 @@
 module Investigations
   class TopicResearchFingerprint
+    def self.discovery(discovery)
+      call(discovery.slice("question", "scope", "plan", "documents", "news_ids", "full_analyses"))
+    end
+
     def self.call(value)
       Digest::SHA256.hexdigest(JSON.generate(canonical(value)))
     end

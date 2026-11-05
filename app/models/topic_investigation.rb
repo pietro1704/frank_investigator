@@ -15,6 +15,7 @@ class TopicInvestigation < ApplicationRecord
 
   attr_readonly :question, :slug
   before_validation :set_identity, on: :create
+  after_update_commit :notify_visible_change
   validates :question, presence: true, length: { maximum: Investigations::TopicDiscovery::MAX_QUESTION_LENGTH }, format: { with: /\A(?=.*\p{L}).*\z/m }
   validates :slug, :run_token, presence: true
   validates :report, presence: true, if: :completed?
@@ -31,6 +32,7 @@ class TopicInvestigation < ApplicationRecord
       lease_expires_at: LEASE_FOR.from_now, started_at: Time.current, finished_at: nil,
       error_code: nil, updated_at: Time.current
     )
+    notify_change(changed)
     token if changed == 1
   end
 
@@ -41,21 +43,21 @@ class TopicInvestigation < ApplicationRecord
   def checkpoint!(run_token:, lease_token:, stage:, discovery:)
     validate_discovery!(discovery)
     raise InvalidDiscovery unless DISCOVERY_STAGES.include?(stage)
-    execution_scope(run_token:, lease_token:).update_all(stage:, discovery:,
-      lease_expires_at: LEASE_FOR.from_now, updated_at: Time.current) == 1
+    update_and_notify(execution_scope(run_token:, lease_token:), stage:, discovery:,
+      lease_expires_at: LEASE_FOR.from_now, updated_at: Time.current)
   end
 
   def finish_discovery!(run_token:, lease_token:, discovery:)
     validate_discovery!(discovery)
     raise InvalidDiscovery unless %w[discovered no_news].include?(discovery["status"])
     state = discovery.fetch("status") == "discovered" ? "awaiting_assessment" : "no_news"
-    execution_scope(run_token:, lease_token:).update_all(status: state, stage: state, discovery:,
-      lease_token: nil, lease_expires_at: nil, finished_at: (Time.current if state == "no_news"), updated_at: Time.current) == 1
+    update_and_notify(execution_scope(run_token:, lease_token:), status: state, stage: state, discovery:,
+      lease_token: nil, lease_expires_at: nil, finished_at: (Time.current if state == "no_news"), updated_at: Time.current)
   end
 
   def fail_execution!(run_token:, lease_token:, code:, phase: "researching")
-    execution_scope(run_token:, lease_token:, phase:).update_all(status: "failed", stage: "failed", error_code: code,
-      lease_token: nil, lease_expires_at: nil, finished_at: Time.current, updated_at: Time.current) == 1
+    update_and_notify(execution_scope(run_token:, lease_token:, phase:), status: "failed", stage: "failed", error_code: code,
+      lease_token: nil, lease_expires_at: nil, finished_at: Time.current, updated_at: Time.current)
   end
 
   def claim_assessment!(run_token:)
@@ -63,6 +65,7 @@ class TopicInvestigation < ApplicationRecord
     changed = self.class.where(id:, run_token:, status: "awaiting_assessment").update_all(
       status: "assessing", stage: "assessing", lease_token: token, lease_expires_at: LEASE_FOR.from_now,
       error_code: nil, updated_at: Time.current)
+    notify_change(changed)
     token if changed == 1
   end
 
@@ -72,15 +75,15 @@ class TopicInvestigation < ApplicationRecord
     valid &&= articles.is_a?(Array) && articles.any? && articles.all? { |item| item.is_a?(Hash) && item["source_id"].is_a?(String) }
     valid &&= articles.pluck("source_id").sort == Array(discovery["news_ids"]).sort
     raise InvalidReport unless valid
-    execution_scope(run_token:, lease_token:, phase: "assessing").update_all(status: "completed", stage: "completed", report:,
-      lease_token: nil, lease_expires_at: nil, finished_at: Time.current, updated_at: Time.current) == 1
+    update_and_notify(execution_scope(run_token:, lease_token:, phase: "assessing"), status: "completed", stage: "completed", report:,
+      lease_token: nil, lease_expires_at: nil, finished_at: Time.current, updated_at: Time.current)
   end
 
   def checkpoint_assessment!(run_token:, lease_token:, stage:, checkpoint: nil)
     raise InvalidReport unless stage.in?(%w[assessing synthesizing])
     attributes = { stage:, lease_expires_at: LEASE_FOR.from_now, updated_at: Time.current }
     attributes[:assessment_checkpoint] = checkpoint if checkpoint
-    execution_scope(run_token:, lease_token:, phase: "assessing").update_all(attributes) == 1
+    update_and_notify(execution_scope(run_token:, lease_token:, phase: "assessing"), **attributes)
   end
 
   def resumable?
@@ -109,8 +112,8 @@ class TopicInvestigation < ApplicationRecord
   def wait_for_analyses!(run_token:, lease_token:)
     snapshot = discovery.deep_dup
     snapshot["analysis_started_at"] = Time.current.iso8601
-    execution_scope(run_token:, lease_token:, phase: "assessing").update_all(status: "awaiting_analyses", stage: "awaiting_analyses",
-      discovery: snapshot, lease_token: nil, lease_expires_at: nil, updated_at: Time.current) == 1
+    update_and_notify(execution_scope(run_token:, lease_token:, phase: "assessing"), status: "awaiting_analyses", stage: "awaiting_analyses",
+      discovery: snapshot, lease_token: nil, lease_expires_at: nil, updated_at: Time.current)
   end
 
   def claim_monitoring!(run_token:, delivery_token: nil)
@@ -130,17 +133,32 @@ class TopicInvestigation < ApplicationRecord
     ready = snapshots.any? { |item| item["status"] == "ready" }
     state = pending ? "awaiting_analyses" : (ready ? "awaiting_assessment" : "failed")
     snapshot["analysis_phase_complete"] = true unless pending
-    execution_scope(run_token:, lease_token:, phase: "monitoring_analyses").update_all(status: state, stage: state, discovery: snapshot,
+    update_and_notify(execution_scope(run_token:, lease_token:, phase: "monitoring_analyses"), status: state, stage: state, discovery: snapshot,
       lease_token: nil, lease_expires_at: (Investigations::MonitorTopicAnalysesJob::POLL_DELAY.from_now if pending),
-      error_code: ("analyses_failed" if state == "failed"), finished_at: (Time.current if state == "failed"), updated_at: Time.current) == 1
+      error_code: ("analyses_failed" if state == "failed"), finished_at: (Time.current if state == "failed"), updated_at: Time.current)
   end
 
   def cancel!
-    self.class.where(id:, status: ACTIVE_STATUSES).update_all(status: "cancelled", stage: "cancelled", error_code: nil,
-      lease_token: nil, lease_expires_at: nil, finished_at: Time.current, updated_at: Time.current) == 1
+    update_and_notify(self.class.where(id:, run_token:, status: ACTIVE_STATUSES), status: "cancelled", stage: "cancelled", error_code: nil,
+      lease_token: nil, lease_expires_at: nil, finished_at: Time.current, updated_at: Time.current)
   end
 
   private
+
+  def update_and_notify(scope, **attributes)
+    changed = scope.update_all(attributes)
+    notify_change(changed)
+    changed == 1
+  end
+
+  def notify_change(changed)
+    Investigations::RefreshTopicReportJob.notify(id, run_token) if changed == 1
+  end
+
+  def notify_visible_change
+    visible = %w[status stage discovery report assessment_checkpoint error_code]
+    Investigations::RefreshTopicReportJob.notify(id, run_token) if (previous_changes.keys & visible).any?
+  end
 
   def execution_scope(run_token:, lease_token:, phase: "researching")
     self.class.where(id:, run_token:, lease_token:, status: phase)

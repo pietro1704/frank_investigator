@@ -37,7 +37,9 @@ class TopicInvestigationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ topic.id, topic.run_token ], enqueued_jobs.sole.fetch(:args)
     follow_redirect!
     assert_response :success
-    assert_select "meta[http-equiv='refresh'][content='5']"
+    assert_select "meta[http-equiv='refresh']", count: 0
+    assert_select "turbo-cable-stream-source[data-topic-progress-target]", count: 1
+    assert_select "turbo-frame[data-topic-reload-url]", count: 1
     assert_select "form[action=?]", cancel_topic_investigation_path(topic)
   end
 
@@ -199,6 +201,32 @@ class TopicInvestigationsControllerTest < ActionDispatch::IntegrationTest
   ensure
     Rack::Attack.cache.store = previous_store
     Rack::Attack.enabled = previous_enabled
+  end
+
+  test "frame requests recover current state and only validated current partial findings are public" do
+    topic = completed_topic
+    report = topic.report.deep_dup
+    topic.update!(status: :assessing, stage: "synthesizing", report: {}, assessment_checkpoint: { "version" => 1,
+      "run_token" => topic.run_token, "discovery_fingerprint" => Investigations::TopicResearchFingerprint.discovery(topic.discovery), "report" => report })
+    frame_id = ActionView::RecordIdentifier.dom_id(topic, :live)
+    get topic_investigation_path(topic), headers: { "Turbo-Frame" => frame_id }
+    assert_response :success
+    assert_select "turbo-frame[id=?]", frame_id
+    assert_select "[data-validated-partial] [data-answer-point='S2']", count: 1
+    assert_select "meta[http-equiv='refresh']", count: 0
+    get topic_investigation_path(topic, format: :json)
+    assert_equal [ "S2" ], response.parsed_body.dig("partial_answer", "known").pluck("id")
+    refute_includes response.body, "model_result"
+    refute_includes response.body, topic.run_token
+    state = topic.assessment_checkpoint.deep_dup
+    state["report"]["model_result"]["articles"].first["evidence"].first["quote"] = "A fabricated passage from an unread source"
+    topic.update!(assessment_checkpoint: state)
+    get topic_investigation_path(topic, format: :json)
+    assert_empty response.parsed_body["partial_answer"]
+    topic.update!(assessment_checkpoint: state.merge("run_token" => "previous"))
+    get topic_investigation_path(topic)
+    assert_select "[data-validated-partial]", count: 0
+    assert_select "a[data-turbo-frame=?]", frame_id, text: "Update progress"
   end
 
   test "consolidated subquestions display their verdicts and literal source citations" do

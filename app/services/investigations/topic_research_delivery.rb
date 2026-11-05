@@ -36,9 +36,10 @@ module Investigations
     end
 
     def self.release(id, run_token, token)
-      TopicInvestigation.where(id:, run_token:, lease_token: token, status: DELIVERABLE).update_all(
+      changed = TopicInvestigation.where(id:, run_token:, lease_token: token, status: DELIVERABLE).update_all(
         lease_token: nil, lease_expires_at: nil, error_code: "enqueue_failed", updated_at: Time.current
       )
+      RefreshTopicReportJob.notify(id, run_token) if changed == 1
     end
     private_class_method :release
   end

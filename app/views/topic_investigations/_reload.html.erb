@@ -1,0 +1,3 @@
+<%= turbo_frame_tag dom_id(topic, :live), src: topic_investigation_path(topic), target: "_top", data: { topic_reload_url: topic_investigation_path(topic) } do %>
+  <p role="status" class="text-center p-5"><%= t("topics.updating") %> <%= link_to t("topics.update_now"), topic_investigation_path(topic), data: { turbo_frame: "_top" }, class: "underline" %></p>
+<% end %>

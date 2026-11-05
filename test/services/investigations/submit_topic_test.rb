@@ -86,7 +86,8 @@ class Investigations::SubmitTopicTest < ActiveSupport::TestCase
     assert_equal "enqueue_failed", topic.error_code
     assert_nil topic.lease_token
     assert_nil topic.lease_expires_at
-    assert_empty enqueued_jobs
+    assert_no_enqueued_jobs(except: Investigations::RefreshTopicReportJob)
+    assert_enqueued_with(job: Investigations::RefreshTopicReportJob)
     Investigations::DiscoverTopicJob.define_singleton_method(:perform_later, original)
     assert_enqueued_with(job: Investigations::DiscoverTopicJob, args: [ topic.id, topic.run_token ]) do
       Investigations::RecoverTopicResearchJob.perform_now
@@ -101,7 +102,8 @@ class Investigations::SubmitTopicTest < ActiveSupport::TestCase
     topic = Investigations::SubmitTopic.call(question: "Vacinas infantis")
     assert_equal "enqueue_failed", topic.reload.error_code
     assert_nil topic.lease_token
-    assert_empty enqueued_jobs
+    assert_no_enqueued_jobs(except: Investigations::RefreshTopicReportJob)
+    assert_enqueued_with(job: Investigations::RefreshTopicReportJob)
   ensure
     Investigations::DiscoverTopicJob.define_singleton_method(:perform_later, original) if original
   end
@@ -126,7 +128,7 @@ class Investigations::SubmitTopicTest < ActiveSupport::TestCase
     assert lease
     clear_enqueued_jobs
     travel 6.minutes do
-      assert_no_enqueued_jobs { Investigations::RecoverTopicResearchJob.perform_now }
+      assert_no_enqueued_jobs(except: Investigations::RefreshTopicReportJob) { Investigations::RecoverTopicResearchJob.perform_now }
     end
     assert_predicate topic.reload, :failed?
     assert_equal "interrupted", topic.error_code
