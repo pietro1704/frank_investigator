@@ -1,5 +1,7 @@
 en:
   topics:
+    deepen: "Investigate this article in full"
+    deepen_unavailable: "The full investigation could not be submitted. Please try again; an existing report will be reused."
     comparison:
       heading: "Compare the investigated articles"
       scope: "Different claims, periods or framing are not automatically factual contradictions. Compare each assertion with its cited evidence. Shared sources and repeated coverage do not establish independence or truth."

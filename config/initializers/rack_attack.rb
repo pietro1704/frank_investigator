@@ -6,7 +6,7 @@ Rack::Attack.throttle("submissions/ip/hour", limit: 30, period: 1.hour) do |req|
   req.ip if req.path == "/" && req.get? && req.params["url"].present?
 end
 
-topic_submission = ->(req) { req.post? && req.path.match?(%r{\A/topic_investigations(?:/[^/]+/restart)?(?:\.[^/]+)?/?\z}) }
+topic_submission = ->(req) { req.post? && req.path.match?(%r{\A/topic_investigations(?:/[^/]+/(?:restart|deepen_article))?(?:\.[^/]+)?/?\z}) }
 Rack::Attack.throttle("topic_submissions/ip/minute", limit: 5, period: 60.seconds) do |req|
   req.ip if topic_submission.call(req)
 end

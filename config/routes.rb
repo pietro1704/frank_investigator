@@ -30,6 +30,7 @@ Rails.application.routes.draw do
 
   resources :topic_investigations, only: [ :new, :create, :show ] do
     member do
+      post :deepen_article
       post :cancel
       post :restart
     end

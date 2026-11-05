@@ -1,5 +1,7 @@
 pt-BR:
   topics:
+    deepen: "Investigar esta notícia por completo"
+    deepen_unavailable: "Não foi possível submeter a investigação completa. Tente novamente; um relatório existente será reutilizado."
     comparison:
       heading: "Compare as notícias investigadas"
       scope: "Afirmações, períodos ou enquadramentos diferentes não são automaticamente contradições factuais. Compare cada afirmação com as evidências citadas. Fontes compartilhadas e repetição entre veículos não estabelecem independência nem verdade."

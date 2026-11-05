@@ -6,6 +6,7 @@
       <section class="min-w-0 break-words border border-line rounded-xl p-4" data-comparison-source="<%= row['source_id'] %>">
         <h3 class="font-bold"><%= row["title"] %></h3>
         <% if (url = topic_source_url(row["url"])) %><p class="underline text-sm my-2"><%= link_to t("topics.original"), url, target: "_blank", rel: "noopener noreferrer" %></p><% end %>
+        <%= render "full_analysis", source: { "id" => row["source_id"], "url" => row["url"] } %>
         <h4 class="font-semibold mt-3"><%= t("topics.comparison.claim") %></h4>
         <blockquote class="border-l-4 border-line pl-3 my-2"><%= row["claim"] %></blockquote>
         <p><span class="<%= badge_class_for(row['verdict']) %>"><%= t("topics.verdicts.#{row['verdict']}") %></span></p>

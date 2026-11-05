@@ -1,0 +1,10 @@
+<% link = @topic.topic_analysis_links.for_run(@topic.run_token).includes(:investigation).find_by(source_id: source["id"], source_url: source["url"]) %>
+<% investigation = link&.investigation %>
+<% if investigation && investigation.normalized_url == source["url"] %>
+  <p class="my-4" data-full-analysis="<%= source['id'] %>">
+    <%= link_to t("topics.full_report"), investigation_path(investigation), class: "underline" %>
+    <span class="text-sm text-muted"><%= investigation.status_badge %></span>
+  </p>
+<% else %>
+  <%= button_to t("topics.deepen"), deepen_article_topic_investigation_path(@topic), params: { source_id: source["id"], generation: Investigations::DeepenTopicArticle.generation(@topic) }, method: :post, class: "my-4 underline", form: { data: { turbo: false, deepen_source: source["id"] } } %>
+<% end %>

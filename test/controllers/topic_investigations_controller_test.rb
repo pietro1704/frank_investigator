@@ -4,13 +4,13 @@ class TopicInvestigationsControllerTest < ActionDispatch::IntegrationTest
   self.use_transactional_tests = false
 
   setup do
-    TopicInvestigation.delete_all
+    TopicInvestigation.destroy_all
     clear_enqueued_jobs
     @previous_secret = ENV["FRANK_AUTH_SECRET"]
   end
   teardown do
     ENV["FRANK_AUTH_SECRET"] = @previous_secret
-    TopicInvestigation.delete_all
+    TopicInvestigation.destroy_all
     clear_enqueued_jobs
     clear_performed_jobs
   end
@@ -153,6 +153,52 @@ class TopicInvestigationsControllerTest < ActionDispatch::IntegrationTest
     get topic_investigation_path(topic, format: :json)
     assert_equal %w[S2 S4], response.parsed_body["comparison"].pluck("source_id")
     refute_includes JSON.generate(response.parsed_body["comparison"]), '"body"'
+  end
+
+  test "article deepening authenticates and binds the submitted source to the displayed generation" do
+    topic = completed_topic
+    generation = Investigations::DeepenTopicArticle.generation(topic)
+    get topic_investigation_path(topic)
+    assert_select "form[data-deepen-source='S2'] button", text: "Investigate this article in full"
+    ENV["FRANK_AUTH_SECRET"] = "secret"
+    assert_no_difference "Investigation.count" do
+      post deepen_article_topic_investigation_path(topic), params: { source_id: "S2", generation: }
+      assert_response :unauthorized
+    end
+    ENV["FRANK_AUTH_SECRET"] = nil
+    original_ids = Investigation.pluck(:id)
+    2.times do
+      post deepen_article_topic_investigation_path(topic), params: { source_id: "S2", generation:, url: "https://example.com/wrong" }
+      assert_response :see_other
+      assert_redirected_to investigation_path(topic.topic_analysis_links.find_by!(source_id: "S2").investigation)
+    end
+    analysis = topic.topic_analysis_links.find_by!(source_id: "S2").investigation
+    assert_equal topic.discovery["documents"].find { |source| source["id"] == "S2" }["url"], analysis.normalized_url
+    assert_equal 1, Investigation.where.not(id: original_ids).count
+    get topic_investigation_path(topic)
+    assert_select "[data-full-analysis='S2'] a[href=?]", investigation_path(analysis)
+    assert_select "form[data-deepen-source='S2']", count: 0
+    post deepen_article_topic_investigation_path(topic, format: :json), params: { source_id: "S1", generation: }
+    assert_response :conflict
+  ensure
+    Investigation.where.not(id: original_ids).destroy_all if original_ids
+  end
+
+  test "article deepening shares the topic submission throttle" do
+    previous_store = Rack::Attack.cache.store
+    previous_enabled = Rack::Attack.enabled
+    Rack::Attack.enabled = true
+    Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
+    topic = completed_topic
+    5.times do
+      post deepen_article_topic_investigation_path(topic, format: :json), params: { source_id: "invalid", generation: "wrong" }
+      assert_response :conflict
+    end
+    post deepen_article_topic_investigation_path(topic, format: :json), params: { source_id: "S2", generation: Investigations::DeepenTopicArticle.generation(topic) }
+    assert_response :too_many_requests
+  ensure
+    Rack::Attack.cache.store = previous_store
+    Rack::Attack.enabled = previous_enabled
   end
 
   test "consolidated subquestions display their verdicts and literal source citations" do
