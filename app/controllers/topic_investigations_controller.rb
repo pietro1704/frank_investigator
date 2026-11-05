@@ -59,7 +59,7 @@ class TopicInvestigationsController < ApplicationController
       retrieval: @topic.discovery.slice("budget", "additional_evidence_rounds", "retrieval_limited"),
       plan: @topic.discovery["plan"], error_code: @topic.error_code,
       started_at: @topic.started_at, finished_at: @topic.finished_at,
-      report: public_report,
+      answer: TopicAnswerPresenter.call(@topic), report: public_report,
       sources: Array(@topic.discovery["documents"]).map { |item| item.slice("id", "title", "url", "kind", "fetched_at", "truncated") },
       failures: Array(@topic.discovery["failures"]),
       editorial_profiles: @topic.discovery.fetch("editorial_profiles", {}).values }

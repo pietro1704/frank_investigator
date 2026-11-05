@@ -1,5 +1,12 @@
 pt-BR:
   topics:
+    answer:
+      known: "O que sabemos"
+      disputed: "O que está em disputa"
+      missing: "O que falta comprovar"
+      empty_known: "Nenhuma conclusão tem evidência original suficiente no material lido."
+      empty_disputed: "Não se estabeleceu uma disputa factual no material lido. Isso não implica consenso."
+      empty_missing: "Esta avaliação não identificou outra lacuna; consulte seu recorte e suas limitações."
     retrieval_budget: "Tentativas de leitura: %{attempts}/%{max_attempts}; até %{max_pages} documentos. Prazo da descoberta: %{seconds} segundos. Páginas não lidas não demonstram falsidade."
     coverage:
       heading: "Cobertura da pesquisa"

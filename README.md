@@ -22,6 +22,8 @@ A fact does not become false because a million sources repeat a falsehood, and a
 
 ## What It Does
 
+- **Answer first:** Topic reports open with what we know, what is disputed and what remains to be proven. Points link to literal read evidence; ungrounded or inapplicable support cannot populate known facts. Historical brief reports remain compatible.
+
 - **Topic analysis provenance:** Per-run source links can share full URL investigations through the existing durable submission service without moving reports between groups. Source identities are unique within a research generation; cancellation does not delete shared investigations.
 
 - **Source selection:** Structured topic plans search up to eight queries and read up to 24 news candidates plus four evidence documents (at most eight evidence attempts). Blocked/irrelevant pages can be replaced within these bounds. Ownership and text-similarity checks prevent republications from counting as independent voices. Editorial quotas require documented classifications with literal evidence; uncertain sources can provide context but never fill missing quotas. Time is bounded by `FRANK_TOPIC_TIMEOUT_SECONDS` (default 900, maximum 1800); news attempts by `FRANK_TOPIC_NEWS_ATTEMPTS` (default/maximum 24).

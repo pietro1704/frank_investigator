@@ -1,5 +1,12 @@
 en:
   topics:
+    answer:
+      known: "What we know"
+      disputed: "What is disputed"
+      missing: "What remains to be proven"
+      empty_known: "No conclusion has sufficient original evidence in the material read."
+      empty_disputed: "No factual dispute was established in the material read. This does not imply consensus."
+      empty_missing: "No additional gap was identified in this assessment; see its scope and limitations."
     retrieval_budget: "Reading attempts: %{attempts}/%{max_attempts}; up to %{max_pages} documents. Discovery deadline: %{seconds} seconds. Unread pages do not establish falsity."
     coverage:
       heading: "Research coverage"
