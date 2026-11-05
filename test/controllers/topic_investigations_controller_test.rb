@@ -129,6 +129,19 @@ class TopicInvestigationsControllerTest < ActionDispatch::IntegrationTest
     assert_nil response.headers["Retry-After"]
   end
 
+  test "answer precedes details and JSON exposes only cited public evidence" do
+    topic = completed_topic
+    get topic_investigation_path(topic)
+    assert_response :success
+    assert_select "[data-topic-answer] h2", text: "What we know"
+    assert_select "[data-answer-group='known'] [data-answer-point='S2'] a[target='_blank']", count: 2
+    assert response.body.index("data-topic-answer") < response.body.index("data-topic-coverage")
+    get topic_investigation_path(topic, format: :json)
+    assert_response :success
+    assert_equal [ "S2" ], response.parsed_body.dig("answer", "known").pluck("id")
+    refute_includes JSON.generate(response.parsed_body["answer"]), '"body"'
+  end
+
   test "consolidated subquestions display their verdicts and literal source citations" do
     root = Rails.root.join("test/fixtures/files/topic_assessment")
     discovery = JSON.parse(File.read(root.join("input.json")))
