@@ -11,7 +11,9 @@ module ReportExports
       browser = nil
       begin
         Timeout.timeout(30) do
-          browser = Ferrum::Browser.new(headless: true, timeout: 15, process_timeout: 10,
+          # Cold starts share the 30-second export deadline; a separate 10-second
+          # startup cap rejected otherwise valid exports under load.
+          browser = Ferrum::Browser.new(headless: true, timeout: 15, process_timeout: 20,
             browser_path: ENV["CHROMIUM_PATH"].presence || ENV["BROWSER_PATH"].presence,
             browser_options: { "no-sandbox" => nil, "disable-dev-shm-usage" => nil })
           browser.network.intercept
