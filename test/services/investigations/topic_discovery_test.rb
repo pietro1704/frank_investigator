@@ -414,6 +414,31 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
     assert_equal 6, @searcher.calls.size
   end
 
+  test "finding a producer without read failures still checks possible contradictions once" do
+    @searcher = fully_readable_searcher
+    result = discover
+    assert_empty result["failures"]
+    assert result["producer_ids"].any?
+    assert_equal 1, result["additional_evidence_rounds"]
+    assert @searcher.calls.any? { |query| query.include?("correction") }
+    assert_operator result.dig("budget", "search_attempts"), :<=, 28
+    assert_equal %w[S2 S4], result["news_ids"]
+  end
+
+  test "counter-evidence queries retain literal names geography and period at the length limit" do
+    prefix = '"Projeto de Medição '
+    suffix = ' Brasil 2024 Amazônia Legal"'
+    query = prefix + "x" * (300 - prefix.length - suffix.length) + suffix
+    @responses[:screen]["evidence_queries"][0] = query
+    @searcher = fully_readable_searcher
+    result = discover
+    assert_equal 300, query.length
+    assert_equal 2, @searcher.calls.count(query), "a length-limited directed query must be preserved verbatim rather than truncated"
+    assert @searcher.calls.all? { |item| item.length <= 300 }
+    assert_equal 1, result["additional_evidence_rounds"]
+    assert_empty result["failures"]
+  end
+
   test "elapsed budget stops after a slow read without publishing it" do
     elapsed = 0
     @fetcher.after_read = -> { elapsed = 2000 }
@@ -504,6 +529,13 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
 
   def distributed(queries, results)
     queries.each_with_index.to_h { |query, index| [ query, results.each_slice(queries.size).filter_map { |slice| slice[index] } ] }
+  end
+
+  def fully_readable_searcher
+    documents = fixture("documents")
+    candidates = documents.map { |item| item.slice("url", "title").merge("snippet" => "") }
+    queries = (@responses[:screen]["evidence_queries"] + @responses[:plan]["evidence_queries"]).uniq
+    Searcher.new(distributed(@responses[:plan]["news_queries"], candidates.first(5)).merge(distributed(queries, candidates.drop(5))))
   end
 
   def discover(question: QUESTION, **options)
