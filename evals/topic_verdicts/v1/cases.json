@@ -1,0 +1,561 @@
+{
+  "version": 1,
+  "description": "Casos de avaliação do veredito central por notícia. Candidatos curados exercitam guardas; não constituem benchmark de inferências reais. URLs example.invalid e suas notícias são explicitamente sintéticas.",
+  "assets": {
+    "captured": {
+      "path": "test/fixtures/files/topic_assessment/input.json",
+      "sha256": "6c9eac27a9a9a1aae50f0ea110d069864fa7256ad4fbeedce3d2dc41ec614335",
+      "origin_commit": "b1a944a26b1a48cee4b9329ffa758a71b370afcd",
+      "capture_date": "not recorded in the original fixture; publication/reference periods are preserved in source text"
+    },
+    "synthetic": {
+      "path": "evals/topic_verdicts/v1/synthetic_sources.json",
+      "sha256": "5a44937b14f3a91b8079f5aa3dffe31da574d3f88cb49041dbb7edc47d39901b",
+      "origin": "authored evaluation scenarios, never attributed to real publishers"
+    }
+  },
+  "rubric": {
+    "verdict": "Conjunto permitido revisado por caso; qualidade editorial não é confiança factual.",
+    "citation_support": "Trechos literais e IDs lidos; relação compatível com o recorte anotado. Vereditos definitivos exigem a fonte original esperada.",
+    "overconfidence": "Veredito definitivo onde a referência é inconclusiva/opinativa ou linguagem de certeza absoluta. Não é um avaliador semântico universal.",
+    "scope": "Apenas a afirmação central; fontes fixas, sem pesquisa na web. Resultados não representam a precisão em todos os assuntos."
+  },
+  "cases": [
+    {
+      "id": "supported",
+      "category": "supported",
+      "question": "O SAD/Imazon registrou queda de 7% no desmatamento da Amazônia Legal de janeiro a dezembro de 2024 ante 2023?",
+      "scope": "SAD/Imazon, Amazônia Legal brasileira, ano civil de 2024 versus 2023; não generalizar para toda a Amazônia.",
+      "as_of": "2026-11-04",
+      "documents": [
+        {
+          "catalog": "captured",
+          "id": "S2"
+        },
+        {
+          "catalog": "captured",
+          "id": "S1"
+        },
+        {
+          "catalog": "captured",
+          "id": "S3"
+        }
+      ],
+      "news_ids": [
+        "S2"
+      ],
+      "candidate_response": {
+        "question": "O SAD/Imazon registrou queda de 7% no desmatamento da Amazônia Legal de janeiro a dezembro de 2024 ante 2023?",
+        "conclusion": "A queda de 7% em 2024 frente a 2023 é sustentada pela publicação do próprio Imazon, produtor do SAD. A conclusão vale para esse sistema e recorte brasileiro, não para toda a Amazônia internacional. O apoio à afirmação central não confirma automaticamente os demais números e explicações da reportagem.",
+        "limitations": [
+          "Avaliação limitada às evidências fixas desta referência."
+        ],
+        "articles": [
+          {
+            "source_id": "S2",
+            "verdict": "supported",
+            "overall_quality": "mixed",
+            "article_quote": "Já em relação ao desmatamento, no ano passado, 3.739 km² de floresta foram derrubados na Amazônia Legal, menos do que os 4.030 km² registrados em 2023. Isso é uma redução de 7%.",
+            "conclusion": "A queda de 7% em 2024 frente a 2023 é sustentada pela publicação do próprio Imazon, produtor do SAD. A conclusão vale para esse sistema e recorte brasileiro, não para toda a Amazônia internacional. O apoio à afirmação central não confirma automaticamente os demais números e explicações da reportagem.",
+            "strengths": [
+              "Identifica o SAD/Imazon, apresenta os valores comparados e delimita o território como Amazônia Legal.",
+              "Distingue desmatamento de degradação e alerta que SAD e Deter não equivalem à taxa oficial de desmatamento."
+            ],
+            "weaknesses": [
+              "O título usa apenas 'Amazônia', expressão mais ampla que o recorte brasileiro explicitado no corpo.",
+              "O valor de 2022, de 10.573 km², diverge dos 10.362 km² apresentados pelo Imazon em S1.",
+              "A expressão 'número de árvores perdidas' é comparada a campos de futebol, que medem área, não quantidade de árvores.",
+              "O corpo disponível de S1 não apresenta o total anual de degradação nem o cálculo dos 497%; a explicação pelas queimadas aparece como atribuição dos pesquisadores, sem análise causal independente nos documentos fornecidos."
+            ],
+            "evidence": [
+              {
+                "source_id": "S1",
+                "quote": "De janeiro a dezembro, foram derrubados 3.739 km², 7% a menos do que no mesmo período de 2023, quando a devastação atingiu 4.030 km².",
+                "relationship": "supports",
+                "primary_reason": "O Imazon publica os resultados do SAD, sistema que ele próprio opera para monitorar desmatamento por satélite. O trecho informa a área desmatada no recorte amazônico brasileiro monitorado pelo sistema, comparando janeiro a dezembro de 2024 com o mesmo período de 2023."
+              },
+              {
+                "source_id": "S3",
+                "quote": "O desmatamento cresceu 256% e a degradação 64% em 2024, em relação a 2023. Em 2024 o desmatamento saiu de 10.391 km², em 2023, para 37.033 km² e a degradação passou de 16.709 km² para 27.349 km2, segundo os dados processados pelo ORA.",
+                "relationship": "context",
+                "primary_reason": "A OTCA publica resultados processados por seu Observatório Regional Amazônico a partir de informações Copernicus/JRC. É a produtora dessa agregação para a Amazônia dos oito países membros, comparando 2024 com 2023, não dos dados SAD brasileiros. A série contextualiza o limite territorial da conclusão, sem refutar diretamente a medição do Imazon."
+              }
+            ]
+          }
+        ]
+      },
+      "candidate_origin": "curated adversarial candidate using the live-observed topic_assessment schema; not an archived model inference",
+      "expected": {
+        "verdicts": [
+          "supported"
+        ],
+        "relationships": {
+          "S1": [
+            "supports",
+            "context"
+          ],
+          "S3": [
+            "context"
+          ]
+        },
+        "required_decisive_sources": [
+          "S1"
+        ],
+        "rationale": "O produtor SAD publica os totais e a comparação do mesmo período; OTCA mede outro recorte e permanece contexto. Trechos históricos do próprio SAD podem servir de contexto, sem substituir a evidência específica da comparação central."
+      },
+      "deterministic_rejection": false
+    },
+    {
+      "id": "contradicted",
+      "category": "contradicted",
+      "question": "O desmatamento do SAD na Amazônia Legal aumentou no ano civil de 2024 ante 2023?",
+      "scope": "Mesmo sistema SAD, território e anos da medição original.",
+      "as_of": "2026-11-04",
+      "documents": [
+        {
+          "catalog": "synthetic",
+          "id": "contradicted"
+        },
+        {
+          "catalog": "captured",
+          "id": "S1"
+        }
+      ],
+      "news_ids": [
+        "S2"
+      ],
+      "candidate_response": {
+        "question": "O desmatamento do SAD na Amazônia Legal aumentou no ano civil de 2024 ante 2023?",
+        "conclusion": "A afirmação de aumento no SAD é contrariada pela medição original de queda de 7% no mesmo recorte.",
+        "limitations": [
+          "Avaliação limitada às evidências fixas desta referência."
+        ],
+        "articles": [
+          {
+            "source_id": "S2",
+            "verdict": "disputed",
+            "overall_quality": "mixed",
+            "article_quote": "O desmatamento medido pelo SAD na Amazônia Legal aumentou de janeiro a dezembro de 2024 em relação a 2023.",
+            "conclusion": "A afirmação de aumento no SAD é contrariada pela medição original de queda de 7% no mesmo recorte.",
+            "strengths": [
+              "A afirmação central está identificada no texto."
+            ],
+            "weaknesses": [
+              "O veredito se limita ao material fornecido."
+            ],
+            "evidence": [
+              {
+                "source_id": "S1",
+                "quote": "De janeiro a dezembro, foram derrubados 3.739 km², 7% a menos do que no mesmo período de 2023, quando a devastação atingiu 4.030 km².",
+                "relationship": "disputes",
+                "primary_reason": "O Imazon publica os resultados do SAD, sistema que ele próprio opera para monitorar desmatamento por satélite. O trecho informa a área desmatada no recorte amazônico brasileiro monitorado pelo sistema, comparando janeiro a dezembro de 2024 com o mesmo período de 2023."
+              }
+            ]
+          }
+        ]
+      },
+      "candidate_origin": "curated adversarial candidate using the live-observed topic_assessment schema; not an archived model inference",
+      "expected": {
+        "verdicts": [
+          "disputed"
+        ],
+        "relationships": {
+          "S1": [
+            "disputes"
+          ]
+        },
+        "required_decisive_sources": [
+          "S1"
+        ],
+        "rationale": "A afirmação sintética troca queda por aumento mantendo a medição e o período."
+      },
+      "deterministic_rejection": false
+    },
+    {
+      "id": "opinion",
+      "category": "opinion",
+      "question": "É possível verificar como fato que o ministro foi um bom ministro?",
+      "scope": "Juízo amplo de valor; não há métricas nem subafirmações factuais fornecidas.",
+      "as_of": "2026-11-04",
+      "documents": [
+        {
+          "catalog": "synthetic",
+          "id": "opinion"
+        }
+      ],
+      "news_ids": [
+        "S2"
+      ],
+      "candidate_response": {
+        "question": "É possível verificar como fato que o ministro foi um bom ministro?",
+        "conclusion": "O ministro foi um bom ministro.",
+        "limitations": [
+          "Avaliação limitada às evidências fixas desta referência."
+        ],
+        "articles": [
+          {
+            "source_id": "S2",
+            "verdict": "supported",
+            "overall_quality": "mixed",
+            "article_quote": "O ministro foi um bom ministro.",
+            "conclusion": "O ministro foi um bom ministro.",
+            "strengths": [
+              "A afirmação central está identificada no texto."
+            ],
+            "weaknesses": [
+              "O veredito se limita ao material fornecido."
+            ],
+            "evidence": []
+          }
+        ]
+      },
+      "candidate_origin": "curated adversarial candidate using the live-observed topic_assessment schema; not an archived model inference",
+      "expected": {
+        "verdicts": [
+          "not_checkable"
+        ],
+        "relationships": {},
+        "required_decisive_sources": [],
+        "rationale": "Uma opinião de desempenho não recebe veredito factual por repetição nem por ausência de documentos."
+      },
+      "deterministic_rejection": false
+    },
+    {
+      "id": "inconclusive",
+      "category": "inconclusive",
+      "question": "A queda nacional de 32,4% do desmatamento em 2024 foi comprovada pelas fontes fornecidas?",
+      "scope": "Brasil, área total desmatada em 2024; o SAD regional não produz a estatística nacional MapBiomas.",
+      "as_of": "2026-11-04",
+      "documents": [
+        {
+          "catalog": "captured",
+          "id": "S4"
+        },
+        {
+          "catalog": "captured",
+          "id": "S1"
+        }
+      ],
+      "news_ids": [
+        "S4"
+      ],
+      "candidate_response": {
+        "question": "A queda nacional de 32,4% do desmatamento em 2024 foi comprovada pelas fontes fornecidas?",
+        "conclusion": "A queda nacional de 32,4% está comprovada.",
+        "limitations": [
+          "Avaliação limitada às evidências fixas desta referência."
+        ],
+        "articles": [
+          {
+            "source_id": "S4",
+            "verdict": "supported",
+            "overall_quality": "insufficient",
+            "article_quote": "O Brasil registrou em 2024 uma redução de 32,4% no desmatamento em relação ao ano anterior, de acordo com o relatório anual da Rede MapBiomas divulgado em maio.",
+            "conclusion": "A queda nacional de 32,4% está comprovada.",
+            "strengths": [
+              "Identifica a fonte alegada, o ano de referência e a comparação com o ano anterior.",
+              "Ressalta que uma redução anual não significa interrupção da perda de vegetação."
+            ],
+            "weaknesses": [
+              "Não há, no conjunto fornecido, evidência original para a queda nacional de 32,4%, a participação de 67% da Amazônia Legal ou os demais números atribuídos ao MapBiomas.",
+              "Alterna Amazônia Legal e bioma Amazônia sem explicar que são delimitações diferentes; a participação atribuída ao Cerrado exige essa distinção para ser interpretada.",
+              "A equivalência entre hectares perdidos e sete árvores por segundo não apresenta método ou densidade de árvores utilizada.",
+              "As atribuições à expansão agropecuária e urbana e as afirmações sobre garimpo permanecem sem documentação original verificável no material fornecido."
+            ],
+            "evidence": [
+              {
+                "source_id": "S1",
+                "quote": "De janeiro a dezembro, foram derrubados 3.739 km², 7% a menos do que no mesmo período de 2023, quando a devastação atingiu 4.030 km².",
+                "relationship": "context",
+                "primary_reason": "O Imazon é o produtor do monitoramento SAD que origina esses totais de área desmatada no recorte amazônico brasileiro em janeiro–dezembro de 2024 e de 2023. A medição contextualiza a existência de uma queda regional, mas não produz nem confirma a estatística nacional de 32,4% atribuída ao MapBiomas."
+              }
+            ]
+          }
+        ]
+      },
+      "candidate_origin": "curated adversarial candidate using the live-observed topic_assessment schema; not an archived model inference",
+      "expected": {
+        "verdicts": [
+          "needs_more_evidence"
+        ],
+        "relationships": {
+          "S1": [
+            "context"
+          ]
+        },
+        "required_decisive_sources": [],
+        "rationale": "O documento original nacional citado pela notícia não integra o corpus. Ausência de prova não significa falsidade."
+      },
+      "deterministic_rejection": false
+    },
+    {
+      "id": "outdated",
+      "category": "outdated",
+      "question": "A taxa atual de desmatamento na Amazônia Legal no ciclo de 2026 é de 6.288 km²?",
+      "scope": "Data de referência da pergunta: 2026-11-04. Evidência fornecida: ciclo Prodes agosto de 2023 a julho de 2024.",
+      "as_of": "2026-11-04",
+      "documents": [
+        {
+          "catalog": "synthetic",
+          "id": "outdated"
+        },
+        {
+          "catalog": "captured",
+          "id": "S6"
+        }
+      ],
+      "news_ids": [
+        "S2"
+      ],
+      "candidate_response": {
+        "question": "A taxa atual de desmatamento na Amazônia Legal no ciclo de 2026 é de 6.288 km²?",
+        "conclusion": "A taxa de 2026 está errada porque o documento do ciclo de 2024 registra 6.288 km².",
+        "limitations": [
+          "Avaliação limitada às evidências fixas desta referência."
+        ],
+        "articles": [
+          {
+            "source_id": "S2",
+            "verdict": "disputed",
+            "overall_quality": "mixed",
+            "article_quote": "A taxa atual de desmatamento na Amazônia Legal no ciclo de 2026 é de 6.288 km².",
+            "conclusion": "A taxa de 2026 está errada porque o documento do ciclo de 2024 registra 6.288 km².",
+            "strengths": [
+              "A afirmação central está identificada no texto."
+            ],
+            "weaknesses": [
+              "O veredito se limita ao material fornecido."
+            ],
+            "evidence": [
+              {
+                "source_id": "S6",
+                "quote": "O valor estimado do desmatamento no período de 01 de agosto de 2023 a 31 de julho de 2024 foi de 6.288 km².",
+                "relationship": "disputes",
+                "primary_reason": "O INPE é o produtor original da taxa de 6.288 km² do ciclo 2023–2024; o candidato tenta usar esse dado para refutar uma afirmação sobre 2026."
+              }
+            ]
+          }
+        ]
+      },
+      "candidate_origin": "curated regression of the stale-original-source contradiction observed in the live evaluation; same live-observed schema",
+      "expected": {
+        "verdicts": [
+          "needs_more_evidence"
+        ],
+        "relationships": {
+          "S6": [
+            "context"
+          ]
+        },
+        "required_decisive_sources": [],
+        "rationale": "Uma medição antiga não comprova nem refuta a taxa atual, mesmo quando o produtor é original."
+      },
+      "deterministic_rejection": false
+    },
+    {
+      "id": "circular",
+      "category": "circular",
+      "question": "O desmatamento chegou a zero em 2024?",
+      "scope": "Duas notícias sintéticas se citam mutuamente, sem produtor original ou medição.",
+      "as_of": "2026-11-04",
+      "documents": [
+        {
+          "catalog": "synthetic",
+          "id": "circle_a"
+        },
+        {
+          "catalog": "synthetic",
+          "id": "circle_b"
+        }
+      ],
+      "news_ids": [
+        "S2"
+      ],
+      "candidate_response": {
+        "question": "O desmatamento chegou a zero em 2024?",
+        "conclusion": "As duas notícias confirmam que o desmatamento chegou a zero.",
+        "limitations": [
+          "Avaliação limitada às evidências fixas desta referência."
+        ],
+        "articles": [
+          {
+            "source_id": "S2",
+            "verdict": "supported",
+            "overall_quality": "mixed",
+            "article_quote": "O desmatamento chegou a zero em 2024.",
+            "conclusion": "As duas notícias confirmam que o desmatamento chegou a zero.",
+            "strengths": [
+              "A afirmação central está identificada no texto."
+            ],
+            "weaknesses": [
+              "O veredito se limita ao material fornecido."
+            ],
+            "evidence": [
+              {
+                "source_id": "S3",
+                "quote": "A notícia A informa que o desmatamento chegou a zero em 2024. A notícia B cita apenas A em https://example.invalid/frank-eval/article-06-a, sem dados próprios ou publicação original.",
+                "relationship": "supports",
+                "primary_reason": ""
+              }
+            ]
+          }
+        ]
+      },
+      "candidate_origin": "curated adversarial candidate using the live-observed topic_assessment schema; not an archived model inference",
+      "expected": {
+        "verdicts": [
+          "needs_more_evidence"
+        ],
+        "relationships": {
+          "S3": [
+            "supports",
+            "context"
+          ]
+        },
+        "required_decisive_sources": [],
+        "rationale": "A cadeia A→B→A pode repetir a afirmação, mas não oferece confirmação independente nem prova original."
+      },
+      "deterministic_rejection": false
+    },
+    {
+      "id": "invented_quote",
+      "category": "invented_quote",
+      "question": "O SAD/Imazon registrou queda de 7% no desmatamento da Amazônia Legal de janeiro a dezembro de 2024 ante 2023?",
+      "scope": "SAD/Imazon, Amazônia Legal brasileira, ano civil de 2024 versus 2023; não generalizar para toda a Amazônia.",
+      "as_of": "2026-11-04",
+      "documents": [
+        {
+          "catalog": "captured",
+          "id": "S2"
+        },
+        {
+          "catalog": "captured",
+          "id": "S1"
+        }
+      ],
+      "news_ids": [
+        "S2"
+      ],
+      "candidate_response": {
+        "question": "O SAD/Imazon registrou queda de 7% no desmatamento da Amazônia Legal de janeiro a dezembro de 2024 ante 2023?",
+        "conclusion": "A queda de 7% em 2024 frente a 2023 é sustentada pela publicação do próprio Imazon, produtor do SAD. A conclusão vale para esse sistema e recorte brasileiro, não para toda a Amazônia internacional. O apoio à afirmação central não confirma automaticamente os demais números e explicações da reportagem.",
+        "limitations": [
+          "Avaliação limitada às evidências fixas desta referência."
+        ],
+        "articles": [
+          {
+            "source_id": "S2",
+            "verdict": "supported",
+            "overall_quality": "mixed",
+            "article_quote": "Já em relação ao desmatamento, no ano passado, 3.739 km² de floresta foram derrubados na Amazônia Legal, menos do que os 4.030 km² registrados em 2023. Isso é uma redução de 7%.",
+            "conclusion": "A queda de 7% em 2024 frente a 2023 é sustentada pela publicação do próprio Imazon, produtor do SAD. A conclusão vale para esse sistema e recorte brasileiro, não para toda a Amazônia internacional. O apoio à afirmação central não confirma automaticamente os demais números e explicações da reportagem.",
+            "strengths": [
+              "Identifica o SAD/Imazon, apresenta os valores comparados e delimita o território como Amazônia Legal.",
+              "Distingue desmatamento de degradação e alerta que SAD e Deter não equivalem à taxa oficial de desmatamento."
+            ],
+            "weaknesses": [
+              "O título usa apenas 'Amazônia', expressão mais ampla que o recorte brasileiro explicitado no corpo.",
+              "O valor de 2022, de 10.573 km², diverge dos 10.362 km² apresentados pelo Imazon em S1.",
+              "A expressão 'número de árvores perdidas' é comparada a campos de futebol, que medem área, não quantidade de árvores.",
+              "O corpo disponível de S1 não apresenta o total anual de degradação nem o cálculo dos 497%; a explicação pelas queimadas aparece como atribuição dos pesquisadores, sem análise causal independente nos documentos fornecidos."
+            ],
+            "evidence": [
+              {
+                "source_id": "S1",
+                "quote": "This quotation was never present in the fixed original source.",
+                "relationship": "supports",
+                "primary_reason": "O Imazon publica os resultados do SAD, sistema que ele próprio opera para monitorar desmatamento por satélite. O trecho informa a área desmatada no recorte amazônico brasileiro monitorado pelo sistema, comparando janeiro a dezembro de 2024 com o mesmo período de 2023."
+              }
+            ]
+          }
+        ]
+      },
+      "candidate_origin": "curated adversarial candidate using the live-observed topic_assessment schema; not an archived model inference",
+      "expected": {
+        "verdicts": [
+          "supported"
+        ],
+        "relationships": {
+          "S1": [
+            "supports"
+          ]
+        },
+        "required_decisive_sources": [
+          "S1"
+        ],
+        "rationale": "Citação inventada ou identidade não lida deve ser rejeitada antes de publicar um veredito."
+      },
+      "deterministic_rejection": true
+    },
+    {
+      "id": "foreign_source",
+      "category": "foreign_source",
+      "question": "O SAD/Imazon registrou queda de 7% no desmatamento da Amazônia Legal de janeiro a dezembro de 2024 ante 2023?",
+      "scope": "SAD/Imazon, Amazônia Legal brasileira, ano civil de 2024 versus 2023; não generalizar para toda a Amazônia.",
+      "as_of": "2026-11-04",
+      "documents": [
+        {
+          "catalog": "captured",
+          "id": "S2"
+        },
+        {
+          "catalog": "captured",
+          "id": "S1"
+        }
+      ],
+      "news_ids": [
+        "S2"
+      ],
+      "candidate_response": {
+        "question": "O SAD/Imazon registrou queda de 7% no desmatamento da Amazônia Legal de janeiro a dezembro de 2024 ante 2023?",
+        "conclusion": "A queda de 7% em 2024 frente a 2023 é sustentada pela publicação do próprio Imazon, produtor do SAD. A conclusão vale para esse sistema e recorte brasileiro, não para toda a Amazônia internacional. O apoio à afirmação central não confirma automaticamente os demais números e explicações da reportagem.",
+        "limitations": [
+          "Avaliação limitada às evidências fixas desta referência."
+        ],
+        "articles": [
+          {
+            "source_id": "S2",
+            "verdict": "supported",
+            "overall_quality": "mixed",
+            "article_quote": "Já em relação ao desmatamento, no ano passado, 3.739 km² de floresta foram derrubados na Amazônia Legal, menos do que os 4.030 km² registrados em 2023. Isso é uma redução de 7%.",
+            "conclusion": "A queda de 7% em 2024 frente a 2023 é sustentada pela publicação do próprio Imazon, produtor do SAD. A conclusão vale para esse sistema e recorte brasileiro, não para toda a Amazônia internacional. O apoio à afirmação central não confirma automaticamente os demais números e explicações da reportagem.",
+            "strengths": [
+              "Identifica o SAD/Imazon, apresenta os valores comparados e delimita o território como Amazônia Legal.",
+              "Distingue desmatamento de degradação e alerta que SAD e Deter não equivalem à taxa oficial de desmatamento."
+            ],
+            "weaknesses": [
+              "O título usa apenas 'Amazônia', expressão mais ampla que o recorte brasileiro explicitado no corpo.",
+              "O valor de 2022, de 10.573 km², diverge dos 10.362 km² apresentados pelo Imazon em S1.",
+              "A expressão 'número de árvores perdidas' é comparada a campos de futebol, que medem área, não quantidade de árvores.",
+              "O corpo disponível de S1 não apresenta o total anual de degradação nem o cálculo dos 497%; a explicação pelas queimadas aparece como atribuição dos pesquisadores, sem análise causal independente nos documentos fornecidos."
+            ],
+            "evidence": [
+              {
+                "source_id": "unread-source",
+                "quote": "De janeiro a dezembro, foram derrubados 3.739 km², 7% a menos do que no mesmo período de 2023, quando a devastação atingiu 4.030 km².",
+                "relationship": "supports",
+                "primary_reason": "O Imazon publica os resultados do SAD, sistema que ele próprio opera para monitorar desmatamento por satélite. O trecho informa a área desmatada no recorte amazônico brasileiro monitorado pelo sistema, comparando janeiro a dezembro de 2024 com o mesmo período de 2023."
+              }
+            ]
+          }
+        ]
+      },
+      "candidate_origin": "curated adversarial candidate using the live-observed topic_assessment schema; not an archived model inference",
+      "expected": {
+        "verdicts": [
+          "supported"
+        ],
+        "relationships": {
+          "S1": [
+            "supports"
+          ]
+        },
+        "required_decisive_sources": [
+          "S1"
+        ],
+        "rationale": "Citação inventada ou identidade não lida deve ser rejeitada antes de publicar um veredito."
+      },
+      "deterministic_rejection": true
+    }
+  ]
+}

@@ -34,6 +34,13 @@ module Investigations
       normalized = articles.map do |article|
         validate_article!(article)
         item = article.deep_dup
+        item.fetch("evidence").each do |cite|
+          next unless %w[supports disputes].include?(cite["relationship"]) && temporal_mismatch?(item, cite)
+          adjusted = true
+          cite["relationship"] = "context"
+          cite["primary_reason"] = I18n.t("topic_assessment.temporal_context")
+          item["weaknesses"].unshift(cite["primary_reason"])
+        end
         verdict = grounded_verdict(item)
         if verdict != item.fetch("verdict")
           adjusted = true
@@ -124,6 +131,15 @@ module Investigations
         text!(item.fetch("primary_reason"), max: 2000, min: 0)
         raise InvalidResponse unless other.fetch("body").squish.include?(item.fetch("quote").squish)
       end
+    end
+
+    # A producer label cannot make an old measurement prove or refute a
+    # different explicitly dated claim. Publication alone is not claim scope.
+    def temporal_mismatch?(article, cite)
+      claim = [ article["article_quote"], @documents.fetch(article["source_id"])["title"] ].join(" ")
+      source = @documents.fetch(cite["source_id"])
+      reference = [ cite["quote"], source["title"] ].join(" ")
+      TopicCitationScope.disjoint_years?(claim:, reference:)
     end
 
     def grounded_verdict(article)

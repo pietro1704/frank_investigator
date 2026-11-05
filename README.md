@@ -6,6 +6,16 @@ Frank Investigator is a Rails 8.1 fact-checking pipeline for news articles. It a
 
 Submit a public article URL. Frank Investigator normalizes it, fetches the page with headless Chromium, extracts canonical claims, follows in-body citations, retrieves corroborating evidence, and produces a structured verdict for each claim with full provenance.
 
+## Evaluating topic verdicts
+
+Run `bin/rails frank:evaluate_topics` for deterministic regressions. `FRANK_EVAL_ONLY=supported,inconclusive` selects exact case IDs; unknown IDs fail. Hash changes require reviewing the reference evidence and annotations. These curated candidates exercise safeguards; their pass rate is **not model accuracy**.
+
+For actual inference, explicitly set `FRANK_EVAL_MODE=live bin/rails frank:evaluate_topics` with the already configured provider/account. This consumes that provider's usage and never changes providers or billing paths. Gold labels and curated candidate answers stay outside the model input. The two malformed-citation probes are explicitly skipped in live mode. Provider errors, invalid responses and cancellation remain per-case failures; an entirely skipped run fails. CI always selects deterministic mode and needs no credentials.
+
+The live reference run exposed an old measurement being used to refute a current claim. Explicitly dated claims now treat citations whose quoted passage/title contains only disjoint years as context; an original producer alone cannot establish temporal applicability. Undated or ambiguous passages still require semantic assessment.
+
+The rubric checks exact quotations, annotated source relationships and required original evidence for the central assertion. It flags definitive verdicts where the reference remains uncertain/opinative, plus selected absolute-certainty wording. It does not establish universal semantic entailment or evaluate every factual claim, and editorial quality is not treated as confidence.
+
 ## Core Principle: Truth Over Consensus
 
 A fact does not become false because a million sources repeat a falsehood, and a falsehood does not become true because it is popular.
@@ -21,6 +31,8 @@ A fact does not become false because a million sources repeat a falsehood, and a
 - Rhetorical fallacy analysis. Bait-and-pivot, appeal to authority, strawman, and other fallacies are detected and flagged.
 
 ## What It Does
+
+- **Versioned verdict evaluation:** `bin/rails frank:evaluate_topics` runs six fixed reference scenarios and two citation-rejection probes through the real topic assessment validator, without model/web calls. Cases cover support, contradiction, opinion, uncertainty, outdated evidence and circular sources. Source hashes and origin commits are pinned in `evals/topic_verdicts/v1/cases.json`; synthetic articles use reserved `.invalid` URLs. Results include verdict, citation support and excess certainty per case, with a nonzero exit on failures and JSON under `tmp/topic_verdict_evaluation.json`.
 
 - **Live topic progress:** Post-commit Turbo notifications invalidate a frame that loads current state, so delayed jobs never broadcast old report snapshots. Reconnection closes missed-update gaps. A manual update link works without JavaScript. Partial article findings re-run the normal validators against matching generation/evidence fingerprints before publication.
 
