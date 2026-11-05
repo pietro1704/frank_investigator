@@ -87,8 +87,8 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
     assert_equal "discovered", result.fetch("status")
     assert_equal %i[plan screen classify], @model.calls.map(&:first)
     assert_includes @searcher.calls, @responses[:screen]["evidence_queries"].first
-    assert_operator @searcher.calls.size, :<=, 6
-    assert_operator @fetcher.calls.size, :<=, 10
+    assert_operator @searcher.calls.size, :<=, 8
+    assert_operator @fetcher.calls.size, :<=, 24
     assert_equal @fetcher.calls.uniq, @fetcher.calls
     assert_equal %w[planning searching_news reading_news screening searching_evidence reading_evidence classifying], stages.uniq
     assert result.fetch("documents").all? { |item| item.fetch("body").length >= 500 }
@@ -338,7 +338,7 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
     result = discover
     assert_equal "no_news", result.fetch("status")
     assert_empty result.fetch("documents")
-    assert_equal 6, result.fetch("failures").size
+    assert_equal 8, result.fetch("failures").size
     assert result.fetch("failures").all? { |item| item.fetch("reason") == "fetch_failed" }
     assert_equal [ :plan ], @model.calls.map(&:first)
   end
@@ -348,7 +348,7 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
     result = discover
     assert_equal "no_news", result.fetch("status")
     assert_empty result.fetch("documents")
-    assert_equal 6, result.fetch("failures").size
+    assert_equal 8, result.fetch("failures").size
     assert result.fetch("failures").all? { |item| item.fetch("reason") == "fetch_failed" }
   end
 
@@ -364,6 +364,62 @@ class Investigations::TopicDiscoveryTest < ActiveSupport::TestCase
     assert_includes result.fetch("producer_ids"), "S6"
     assert_equal document.fetch("url"), result.fetch("documents").last.fetch("url")
     assert_equal %w[S2 S4], result.fetch("news_ids")
+  end
+
+  test "legacy discovery replaces six blocked candidates with later readable results" do
+    original = @searcher.answers
+    queries = @responses[:plan].fetch("news_queries")
+    blocked = 6.times.map { |i| { "url" => "https://blocked#{i}.example.org/report", "title" => "Blocked", "snippet" => "" } }
+    news = fixture("news_candidates").first(2)
+    @searcher = Searcher.new(original.merge(distributed(queries, blocked + news)))
+    @model.define_singleton_method(:screen) do |documents:, **|
+      { "reviews" => documents.map { |item| { "id" => item["id"], "relevant" => true, "reason" => "Captured scope", "scope_quote" => item["body"].first(60) } }, "evidence_queries" => [] }
+    end
+    @model.define_singleton_method(:classify) do |documents:, **|
+      { "documents" => documents.map { |item| { "id" => item["id"], "kind" => "news_article", "reason" => "Captured article", "quote" => item["body"].first(60) } } }
+    end
+    result = discover
+    assert_equal "discovered", result["status"]
+    assert_equal 6, result["failures"].count { |item| item["url"].include?("blocked") }
+    assert_includes result["documents"].pluck("url"), news.last["url"]
+    assert_equal 1, result.fetch("additional_evidence_rounds")
+    assert_operator result.dig("budget", "read_attempts"), :<=, 24
+  end
+
+  test "subscription shells are rejected even when they exceed the minimum text length" do
+    docs = fixture("documents")
+    blocked = docs.first["url"]
+    docs.first["body"] = "Assine assinatura assinante conteúdo exclusivo. " * 20
+    @fetcher = Fetcher.new(docs)
+    # Stop after retrieval to isolate shell filtering from captured fixed source IDs.
+    snapshots = []
+    stopped = false
+    assert_raises(Investigations::TopicDiscovery::Cancelled) do
+      discover(cancelled: -> { stopped }, on_progress: lambda { |stage, snapshot|
+        snapshots << snapshot
+        stopped = stage == "screening"
+      })
+    end
+    assert snapshots.last["failures"].any? { |item| item["url"] == blocked && item["reason"] == "insufficient_text" }
+    refute_includes snapshots.last["documents"].pluck("url"), blocked
+    assert_includes @fetcher.calls, blocked
+    refute_includes @model.calls.map(&:first), :screen
+  end
+
+  test "cancellation during the additional round prevents further calls" do
+    stopped = false
+    assert_raises(Investigations::TopicDiscovery::Cancelled) do
+      discover(cancelled: -> { stopped }, on_progress: ->(_, snapshot) { stopped = true if snapshot["additional_evidence_rounds"] == 1 })
+    end
+    assert_equal 6, @searcher.calls.size
+  end
+
+  test "elapsed budget stops after a slow read without publishing it" do
+    elapsed = 0
+    @fetcher.after_read = -> { elapsed = 2000 }
+    assert_raises(Investigations::TopicDiscovery::BudgetExceeded) { discover(clock: -> { elapsed }) }
+    assert_equal 1, @fetcher.calls.size
+    assert_equal [ :plan ], @model.calls.map(&:first)
   end
 
   test "private search result URLs are rejected before opening a browser" do

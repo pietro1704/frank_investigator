@@ -1,4 +1,5 @@
 require "set"
+require "timeout"
 
 module Investigations
   # Retrieves and identifies source documents. It deliberately issues no verdict:
@@ -14,6 +15,9 @@ module Investigations
     MAX_QUESTION_LENGTH = 500
     MAX_NEWS_PAGES = 6
     MAX_EVIDENCE_PAGES = 4
+    MAX_READ_PAGES = 28
+    MAX_READ_ATTEMPTS = 36
+    MAX_SEARCH_ATTEMPTS = 28
     MAX_BODY_LENGTH = 14_000
     MIN_BODY_LENGTH = 500
     DOCUMENT_KINDS = %w[news_article producer_publication index_or_other].freeze
@@ -30,17 +34,26 @@ module Investigations
     end
 
     def initialize(question:, model: ResearchModel.new, searcher: Fetchers::WebSearcher,
-      fetcher: Fetchers::ChromiumFetcher, cancelled: -> { false }, on_progress: ->(*) { })
+      fetcher: Fetchers::ChromiumFetcher, cancelled: -> { false }, on_progress: ->(*) { }, clock: -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) })
       @question = self.class.normalize_question(question)
       @model, @searcher, @fetcher = model, searcher, fetcher
-      @cancelled, @on_progress = cancelled, on_progress
+      @cancelled, @on_progress, @clock = cancelled, on_progress, clock
       @visited = Set.new
-      @deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + ENV.fetch("FRANK_TOPIC_TIMEOUT_SECONDS", 900).to_i.clamp(30, 1800)
-      @result = { "question" => @question, "status" => "discovering", "scope" => nil,
+      @timeout_seconds = ENV.fetch("FRANK_TOPIC_TIMEOUT_SECONDS", 900).to_i.clamp(30, 1800)
+      @deadline = @clock.call + @timeout_seconds
+      @result = { "budget" => { "seconds" => @timeout_seconds, "max_read_pages" => MAX_READ_PAGES, "max_read_attempts" => MAX_READ_ATTEMPTS,
+          "max_search_attempts" => MAX_SEARCH_ATTEMPTS, "read_attempts" => 0, "search_attempts" => 0 },
+        "question" => @question, "status" => "discovering", "scope" => nil,
         "documents" => [], "failures" => [], "searches" => [], "news_ids" => [], "producer_ids" => [], "excluded_ids" => [] }
     end
 
     def call
+      Timeout.timeout(@timeout_seconds, BudgetExceeded) { discover }
+    end
+
+    private
+
+    def discover
       progress("planning")
       plan = TopicPlan.call(@model.plan(question: @question))
       validate_plan!(plan)
@@ -50,7 +63,7 @@ module Investigations
 
       progress("searching_news")
       candidates = search(plan.fetch("news_queries"), stage: "searching_news")
-      read(candidates, role: "news", limit: MAX_NEWS_PAGES)
+      read(candidates, role: "news", limit: 12, successful_limit: MAX_NEWS_PAGES)
       return no_news if documents.empty?
 
       progress("screening")
@@ -62,17 +75,13 @@ module Investigations
       progress("searching_evidence")
       queries = (screen.fetch("evidence_queries") + plan.fetch("evidence_queries")).uniq.first(4)
       candidates = search(queries, stage: "searching_evidence")
-      read(candidates, role: "evidence", limit: MAX_EVIDENCE_PAGES)
+      read(candidates, role: "evidence", limit: 8, successful_limit: MAX_EVIDENCE_PAGES)
 
-      progress("classifying")
-      classification = @model.classify(question: @question, documents: documents.map { |item| item.except("editorial_profile", "editorial_position", "editorial_confidence", "editorial_reason", "editorial_quote") }.deep_dup)
-      validate_classification!(classification)
-      @result["classification"] = classification
-      kinds = classification.fetch("documents").index_by { |item| item.fetch("id") }
-      documents.each { |item| item["kind"] = kinds.fetch(item.fetch("id")).fetch("kind") }
-      @result["news_ids"] = relevant_ids.select { |id| kinds.fetch(id).fetch("kind") == "news_article" }
-      @result["producer_ids"] = documents.select { |item| item.fetch("kind") == "producer_publication" }.pluck("id")
-      @result["excluded_ids"] = documents.select { |item| item.fetch("kind") == "index_or_other" }.pluck("id")
+      classify_documents!
+      set_evidence_ids!
+      @result["news_ids"] = relevant_ids.select { |id| documents.find { |item| item["id"] == id }["kind"] == "news_article" }
+      replenish_evidence!(plan, screen)
+      @result["news_ids"] = relevant_ids.select { |id| documents.find { |item| item["id"] == id }["kind"] == "news_article" }
       check_cancelled!
       @result["status"] = @result.fetch("news_ids").any? ? "discovered" : "no_news"
       @result
@@ -118,9 +127,36 @@ module Investigations
       classify_documents!
       documents.each { |document| resolver.enrich(document) } if resolver
       select_documents!(relevant_ids, plan)
+      replenish_evidence!(plan, screen)
+      documents.each { |document| resolver.enrich(document) } if resolver
+      select_documents!(relevant_ids, plan)
       @result["status"] = @result.fetch("news_ids").any? ? "discovered" : "no_news"
       progress("classifying")
       @result
+    end
+
+    def set_evidence_ids!
+      @result["producer_ids"] = documents.select { |item| item["kind"] == "producer_publication" }.pluck("id")
+      @result["excluded_ids"] = documents.select { |item| item["kind"] == "index_or_other" }.pluck("id")
+    end
+
+    # One bounded round, aimed at missing originals and possible counter-evidence.
+    # A producer label is a retrieval signal, never proof of a claim.
+    def replenish_evidence!(plan, screen)
+      return unless @result["producer_ids"].empty? ||
+        @result["failures"].any? || @result.dig("selection", "coverage_complete") == false
+      @result["additional_evidence_rounds"] = 1
+      progress("searching_evidence")
+      used = @result["searches"].pluck("query")
+      queries = (Array(screen&.fetch("evidence_queries")) + plan.fetch("evidence_queries")).reject { |query| used.include?(query) }
+      queries += Array(screen&.fetch("evidence_queries")).map { |query| "#{query.first(220)} original document corrections contradictory evidence" }
+      queries << "#{@question.first(220)} original data corrections contradictory evidence"
+      candidates = search(queries.uniq.first(2), stage: "searching_evidence")
+      previous_size = documents.size
+      read(candidates, role: "evidence", limit: 4, successful_limit: 2)
+      classify_documents! if documents.size > previous_size
+      set_evidence_ids!
+      @result["retrieval_limited"] = true if @result["producer_ids"].empty? || @result["failures"].any?
     end
 
     def screen_documents!
@@ -162,7 +198,7 @@ module Investigations
 
     def check_cancelled!
       raise Cancelled if @cancelled.call
-      raise BudgetExceeded if Process.clock_gettime(Process::CLOCK_MONOTONIC) > @deadline
+      raise BudgetExceeded if @clock.call > @deadline
     end
 
     def progress(stage)
@@ -183,6 +219,8 @@ module Investigations
         results = []
         2.times do |attempt|
           check_cancelled!
+          break if @result["budget"]["search_attempts"] >= MAX_SEARCH_ATTEMPTS
+          @result["budget"]["search_attempts"] += 1
           outcome = if @searcher.respond_to?(:call_with_status)
             @searcher.call_with_status(query:, max_results: 5)
           else
@@ -212,21 +250,23 @@ module Investigations
       initial_size = documents.size
       candidates.each do |candidate|
         check_cancelled!
-        break if attempts >= limit || (successful_limit && documents.size - initial_size >= successful_limit)
+        break if documents.size >= MAX_READ_PAGES || @result["budget"]["read_attempts"] >= MAX_READ_ATTEMPTS || attempts >= limit || (successful_limit && documents.size - initial_size >= successful_limit)
         next if @visited.include?(candidate.url)
 
         @visited.add(candidate.url)
+        attempts += 1
+        @result["budget"]["read_attempts"] += 1
         begin
           url = UrlNormalizer.call(candidate.url)
           raise UrlNormalizer::InvalidUrlError if URI.parse(url).userinfo.present?
           next if url != candidate.url && @visited.include?(url)
           @visited.add(url)
-          attempts += 1
           check_cancelled!
           snapshot = @fetcher.call(url)
           check_cancelled!
           parsed = Parsing::MainContentExtractor.call(html: snapshot.html, url:)
-          if parsed.body_text.to_s.length < MIN_BODY_LENGTH
+          quality = Parsing::ContentQualityGate.call(body_text: parsed.body_text, title: parsed.title, url:)
+          if parsed.body_text.to_s.length < MIN_BODY_LENGTH || !quality.pass
             @result.fetch("failures") << { "url" => url, "reason" => "insufficient_text" }
           else
             check_cancelled!
@@ -236,7 +276,6 @@ module Investigations
               "publisher_pages" => TopicEditorialProfiles.publisher_pages(snapshot.html, url) }
           end
         rescue UrlNormalizer::InvalidUrlError
-          attempts += 1
           @result.fetch("failures") << { "url" => candidate.url, "reason" => "unsafe_url" }
         rescue Fetchers::ChromiumFetcher::FetchError, Ferrum::StatusError, Timeout::Error
           @result.fetch("failures") << { "url" => candidate.url, "reason" => "fetch_failed" }

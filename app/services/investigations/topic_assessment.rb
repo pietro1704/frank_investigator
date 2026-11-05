@@ -63,6 +63,7 @@ module Investigations
       limitations << I18n.t("topics.errors.search_unavailable") if @discovery.fetch("searches", []).any? { |item| item["status"] == "failed" }
       limitations << I18n.t("topic_assessment.unreadable") if @discovery.fetch("failures", []).any?
       limitations << I18n.t("topic_assessment.truncated") if @documents.values.any? { |item| item["truncated"] }
+      limitations << I18n.t("topic_assessment.retrieval_limited") if @discovery["retrieval_limited"]
       check_cancelled!
       { "question" => @discovery.fetch("question"), "scope" => @discovery.fetch("scope"),
         "conclusion" => adjusted ? I18n.t("topic_assessment.adjusted") : raw.fetch("conclusion"),

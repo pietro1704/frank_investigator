@@ -56,6 +56,7 @@ class TopicInvestigationsController < ApplicationController
       ready: @topic.completed? && coverage.fetch("complete"), terminal: !active?,
       report_available: @topic.completed? && @topic.report.present?, coverage:,
       synthesis_progress: @topic.synthesis_progress, resumable: @topic.resumable?,
+      retrieval: @topic.discovery.slice("budget", "additional_evidence_rounds", "retrieval_limited"),
       plan: @topic.discovery["plan"], error_code: @topic.error_code,
       started_at: @topic.started_at, finished_at: @topic.finished_at,
       report: public_report,
