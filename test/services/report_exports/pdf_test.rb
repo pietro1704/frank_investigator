@@ -16,9 +16,16 @@ class ReportExports::PdfTest < ActiveSupport::TestCase
       launcher.write("#!/bin/sh\nsleep 11\nexec #{Shellwords.escape(binary)} \"$@\"\n")
       launcher.flush
       File.chmod(0o755, launcher.path)
-      ENV["CHROMIUM_PATH"] = launcher.path
+      path = launcher.path
+      launcher.close # Linux cannot execute a launcher still open for writing (ETXTBSY).
+      ENV["CHROMIUM_PATH"] = path
       started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      assert ReportExports::Pdf.call(document).start_with?("%PDF-")
+      begin
+        data = ReportExports::Pdf.call(document)
+      rescue ReportExports::Pdf::Unavailable => error
+        flunk "Cold-start PDF unavailable: #{error.cause&.class}: #{error.cause&.message}"
+      end
+      assert data.start_with?("%PDF-")
       assert_operator Process.clock_gettime(Process::CLOCK_MONOTONIC) - started, :<, 30
       refute ReportExports::Pdf::LOCK.locked?
     end
