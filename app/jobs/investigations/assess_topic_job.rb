@@ -29,7 +29,7 @@ module Investigations
       options[:model] = RecordedAssessment.new(state["report"]) if state.dig("report", "model_result").is_a?(Hash)
       result = TopicAssessment.call(**options)
       state["report"] = result
-      if topic.full_analysis_required?
+      if topic.synthesis_required?
         synthesizing = true
         return unless topic.checkpoint_assessment!(run_token:, lease_token: token, stage: "synthesizing", checkpoint: state)
         result = TopicSynthesis.call(discovery: topic.discovery, report: result, cancelled:,

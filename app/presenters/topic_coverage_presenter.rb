@@ -16,11 +16,14 @@ class TopicCoveragePresenter
     counts = requirements.fetch("editorial_counts", {})
     requested = requirements.fetch("news_count", 0).to_i
     requested = counts.values.sum if requested.zero?
+    assessed_ids = @topic.completed? ? Array(@topic.report["articles"]).pluck("source_id") : []
     links = @topic.topic_analysis_links.for_run(@topic.run_token).includes(:investigation).index_by(&:source_id)
     sources = selected.map do |document|
       link = links[document["id"]]
       valid = link && link.source_url == document["url"]
-      status = if !@topic.full_analysis_required?
+      status = if @topic.analysis_mode_brief?
+        assessed_ids.include?(document["id"]) ? "assessed" : "pending"
+      elsif !@topic.full_analysis_required?
         "not_requested"
       else
         valid ? link.status : "pending"
@@ -29,16 +32,22 @@ class TopicCoveragePresenter
         "editorial_position" => document.fetch("editorial_position", "unknown"),
         "editorial_evidence" => editorial_evidence(document),
         "status" => status, "analysis_slug" => (link.investigation&.slug if valid),
-        "error_code" => (link.error_code if valid) }
+        "error_code" => (link.error_code if valid && @topic.full_analysis_required?) }
     end
-    ready_ids = sources.select { |item| item["status"] == "ready" }.pluck("source_id")
+    ready_ids = sources.select { |item| item["status"].in?(%w[ready assessed]) }.pluck("source_id")
     quotas = counts.map do |side, count|
       members = selected.select { |item| item["editorial_position"] == side && item["editorial_confidence"] == "documented" }
       analyzed = members.count { |item| ready_ids.include?(item["id"]) }
       [ side, { "requested" => count, "selected" => members.size, "analyzed" => analyzed, "missing" => [ count - analyzed, 0 ].max } ]
     end.to_h
-    target = requested.positive? ? requested : Investigations::TopicDiscovery::MAX_NEWS_PAGES
-    complete = if @topic.full_analysis_required?
+    target = if requested.positive?
+      requested
+    else
+      @topic.analysis_mode_brief? ? selected.size : Investigations::TopicDiscovery::MAX_NEWS_PAGES
+    end
+    complete = if @topic.analysis_mode_brief?
+      @topic.completed? && selected.any? && selected.size >= target && ready_ids.size == selected.size && quotas.values.all? { |quota| quota["missing"].zero? }
+    elsif @topic.full_analysis_required?
       selected.size >= target && ready_ids.size == selected.size && quotas.values.all? { |quota| quota["missing"].zero? }
     else
       @topic.completed?

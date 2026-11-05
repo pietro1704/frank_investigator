@@ -31,6 +31,7 @@ pt-BR:
       counts: "Selecionadas: %{selected}; analisadas: %{analyzed}; pendentes: %{pending}; falhas ou desatualizadas: %{failed}; não lidas: %{unread}."
       quota: "%{side}: solicitadas %{requested}, selecionadas %{selected}, analisadas %{analyzed}, faltantes %{missing}."
       statuses:
+        assessed: "Avaliação resumida disponível"
         not_requested: "Análise completa não solicitada neste relatório histórico"
         pending: "Aguardando análise"
         ready: "Análise disponível"
@@ -63,7 +64,8 @@ pt-BR:
     archive: "Consultar relatórios já existentes no acervo"
     invalid: "Digite uma pergunta com palavras e no máximo %{max} caracteres."
     conflict: "Esta ação não está mais disponível no estado atual da investigação."
-    brief_scope: "Investigação resumida da afirmação central de cada notícia. O veredito factual e a qualidade editorial são avaliações distintas; falta de evidência não significa que a notícia seja falsa."
+    article_quality: "Avaliação geral do artigo"
+    brief_scope: "Resposta à pergunta com evidências verificadas e avaliação resumida dos artigos de apoio: qualidade geral, pontos sustentados, erros e ressalvas. A análise completa por notícia é opcional. Qualidade editorial e veredito factual são dimensões distintas; falta de evidência não significa falsidade."
     progress: "%{count} documentos lidos. O andamento atualiza automaticamente; você pode voltar a este link depois."
     cancel: "Cancelar investigação"
     retry: "Tentar novamente"
@@ -112,7 +114,7 @@ pt-BR:
       classifying: "Identificando notícias e publicações originais"
     errors:
       synthesis_timeout: "Uma resposta consolidada excedeu o limite de tempo. Retome para aproveitar as matérias e respostas já validadas."
-      assessment_timeout: "A avaliação das matérias excedeu o limite de tempo. Retome para reutilizar as fontes lidas e as análises completas."
+      assessment_timeout: "A avaliação das matérias excedeu o limite de tempo. Retome para reutilizar as fontes lidas e as avaliações salvas."
       synthesis_invalid: "Uma resposta consolidada falhou na validação de citações ou recorte. Nenhum relatório final foi publicado; as respostas validadas permanecem salvas para retomada."
       analysis_submission_failed: "Não foi possível enviar todas as análises completas. Uma nova tentativa inicia outra execução."
       analysis_monitoring_failed: "Não foi possível validar o andamento das análises completas. Nenhum relatório final foi publicado."

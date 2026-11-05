@@ -340,6 +340,32 @@ class TopicInvestigationsControllerTest < ActionDispatch::IntegrationTest
     Rack::Attack.enabled = previous_enabled
   end
 
+  test "a brief answer has article grades findings citations and optional deepening without full links" do
+    directory = Rails.root.join("test/fixtures/files/topic_assessment")
+    input = JSON.parse(File.read(directory.join("input.json")))
+    input["plan"] = { "version" => 2, "requirements" => {} }
+    report = JSON.parse(File.read(directory.join("report.json")))
+    topic = TopicInvestigation.create!(analysis_mode: :brief, question: input["question"], status: :completed,
+      discovery: input, report:, finished_at: Time.current)
+    assert_empty topic.topic_analysis_links
+    I18n.with_locale(:"pt-BR") do
+      get topic_investigation_path(topic)
+      assert_response :success
+      assert_select "[data-topic-answer] h2", count: 3
+      assert_select "[data-article-quality]", count: 2
+      assert_includes response.body, "Pontos fortes"
+      assert_includes response.body, "Pontos fracos"
+      assert_includes response.body, "A análise completa por notícia é opcional"
+      assert_select "form[data-deepen-source]", count: 2
+      assert_select "[data-partial-result]", count: 0
+    end
+    get topic_investigation_path(topic, format: :json)
+    assert_equal "brief", response.parsed_body["analysis_mode"]
+    assert_equal true, response.parsed_body["ready"]
+    assert_equal 2, response.parsed_body.dig("coverage", "analyzed")
+    assert_empty topic.reload.topic_analysis_links
+  end
+
   private
 
   def completed_topic

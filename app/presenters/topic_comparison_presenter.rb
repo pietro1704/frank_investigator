@@ -20,6 +20,7 @@ class TopicComparisonPresenter
       { "source_id" => item["source_id"], "title" => source["title"], "url" => source["url"],
         "claim" => point["claim"], "verdict" => point["verdict"], "conclusion" => point["conclusion"],
         "factual_challenge" => challenged, "citations" => citations,
+        "overall_quality" => Investigations::TopicAssessment::QUALITIES.include?(item["overall_quality"]) ? item["overall_quality"] : "insufficient",
         "shared_source_ids" => citations.pluck("source_id").uniq.select { |id| uses.fetch(id, 0) > 1 },
         # These are editorial observations from the assessment, not new factual verdicts.
         # No evidence and no inference of intent may become an omission accusation.

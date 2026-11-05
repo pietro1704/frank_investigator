@@ -31,6 +31,7 @@ en:
       counts: "Selected: %{selected}; analyzed: %{analyzed}; pending: %{pending}; failed or stale: %{failed}; unread: %{unread}."
       quota: "%{side}: requested %{requested}, selected %{selected}, analyzed %{analyzed}, missing %{missing}."
       statuses:
+        assessed: "Brief assessment available"
         not_requested: "Full analysis not requested in this historical report"
         pending: "Awaiting analysis"
         ready: "Analysis available"
@@ -63,7 +64,8 @@ en:
     archive: "Find existing reports in the archive"
     invalid: "Enter a question containing words, with at most %{max} characters."
     conflict: "This action is no longer available for the current investigation state."
-    brief_scope: "A brief investigation of the central assertion in each news article. The factual verdict and editorial quality are separate assessments; missing evidence does not mean a story is false."
+    article_quality: "Overall article quality"
+    brief_scope: "An answer to the question grounded in verified evidence, with brief supporting article assessments: overall quality, supported findings, errors and caveats. Full article analysis is optional. Editorial quality and factual verdict are separate; missing evidence does not mean falsity."
     progress: "%{count} documents read. Progress updates automatically; you may return to this link later."
     cancel: "Cancel investigation"
     retry: "Try again"
@@ -112,7 +114,7 @@ en:
       classifying: "Identifying news and original publications"
     errors:
       synthesis_timeout: "A consolidated answer exceeded its time budget. Resume to keep the validated articles and answers already saved."
-      assessment_timeout: "Article assessment exceeded its time budget. Resume to reuse the read sources and full analyses."
+      assessment_timeout: "Article assessment exceeded its time budget. Resume to reuse the read sources and saved assessments."
       synthesis_invalid: "A consolidated answer failed citation or scope validation. No final report was published; validated answers remain saved for a retry."
       analysis_submission_failed: "Could not submit all full analyses. Retry explicitly to start a new research run."
       analysis_monitoring_failed: "Full-analysis progress could not be validated. No final report was published."

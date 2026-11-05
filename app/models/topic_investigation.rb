@@ -13,7 +13,9 @@ class TopicInvestigation < ApplicationRecord
     assessing: "assessing", awaiting_analyses: "awaiting_analyses", monitoring_analyses: "monitoring_analyses", completed: "completed", no_news: "no_news", failed: "failed", cancelled: "cancelled"
   }, default: :queued, validate: true
 
-  attr_readonly :question, :slug
+  enum :analysis_mode, { brief: "brief", full: "full" }, prefix: true, validate: true
+
+  attr_readonly :question, :slug, :analysis_mode
   before_validation :set_identity, on: :create
   after_update_commit :notify_visible_change
   validates :question, presence: true, length: { maximum: Investigations::TopicDiscovery::MAX_QUESTION_LENGTH }, format: { with: /\A(?=.*\p{L}).*\z/m }
@@ -87,10 +89,12 @@ class TopicInvestigation < ApplicationRecord
   end
 
   def resumable?
-    return false unless status.in?(%w[failed cancelled]) && full_analysis_required? && discovery["status"] == "discovered"
+    return false unless status.in?(%w[failed cancelled]) && synthesis_required? && discovery["status"] == "discovered"
     ids = Array(discovery["news_ids"])
     return false if ids.empty? || ids.uniq != ids
     documents = Array(discovery["documents"]).index_by { |item| item["id"] }
+    return false unless ids.all? { |id| documents[id]&.fetch("kind", nil) == "news_article" }
+    return discovery["question"] == question if analysis_mode_brief?
     links = topic_analysis_links.for_run(run_token).includes(:investigation).to_a
     links.pluck(:source_id).sort == ids.sort && links.all? do |link|
       link.investigation&.normalized_url == link.source_url && documents[link.source_id]&.fetch("url", nil) == link.source_url
@@ -106,7 +110,11 @@ class TopicInvestigation < ApplicationRecord
   end
 
   def full_analysis_required?
-    discovery.dig("plan", "version").to_i >= 2
+    analysis_mode_full? && synthesis_required?
+  end
+
+  def synthesis_required?
+    analysis_mode_brief? || discovery.dig("plan", "version").to_i >= 2
   end
 
   def wait_for_analyses!(run_token:, lease_token:)

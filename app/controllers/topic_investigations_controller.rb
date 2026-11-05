@@ -68,7 +68,7 @@ class TopicInvestigationsController < ApplicationController
 
   def representation
     coverage = TopicCoveragePresenter.call(@topic)
-    { slug: @topic.slug, question: @topic.question, status: @topic.status, stage: @topic.stage,
+    { slug: @topic.slug, question: @topic.question, status: @topic.status, stage: @topic.stage, analysis_mode: @topic.analysis_mode,
       ready: @topic.completed? && coverage.fetch("complete"), terminal: !active?,
       report_available: @topic.completed? && @topic.report.present?, coverage:,
       synthesis_progress: @topic.synthesis_progress, resumable: @topic.resumable?,

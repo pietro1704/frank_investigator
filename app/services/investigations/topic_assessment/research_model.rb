@@ -39,6 +39,9 @@ module Investigations
           ambiguous questions. Unsupported causal attribution and omitted context must be disclosed.
           Rate editorial quality independently: strong, mixed, weak or insufficient. Minor ordinary
           editorial choices alone do not mean manipulation. For absent evidence use insufficient.
+          In strengths and weaknesses, identify what is supported, contradicted or unverified
+          on the checked point; distinguish these from editorial choices. Do not imply the whole
+          article has been exhaustively verified or label an unverified claim false.
           Give a grounded overall conclusion and limitations. Never invent facts, sources, quotations,
           URLs or identifiers. Maximum eight evidence items and twelve strengths/weaknesses/limitations
           per list. Do not claim to have consulted documents beyond those actually read.

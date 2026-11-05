@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_03_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_05_140000) do
   create_table "article_claims", force: :cascade do |t|
     t.integer "article_id", null: false
     t.integer "claim_id", null: false
@@ -545,6 +545,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_03_010000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.json "assessment_checkpoint", default: {}, null: false
+    t.string "analysis_mode", default: "full", null: false
     t.index ["run_token"], name: "index_topic_investigations_on_run_token", unique: true
     t.index ["slug"], name: "index_topic_investigations_on_slug", unique: true
     t.index ["status", "lease_expires_at"], name: "index_topic_investigations_on_status_and_lease_expires_at"
