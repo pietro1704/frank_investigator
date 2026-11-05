@@ -10,10 +10,11 @@ module Investigations
       expired = TopicInvestigation.where(status: %w[researching assessing monitoring_analyses])
         .where("lease_expires_at IS NULL OR lease_expires_at <= ?", now).order(:id).limit(LIMIT)
       expired.pluck(:id, :run_token, :lease_token).each do |id, run_token, lease_token|
-        TopicInvestigation.where(id:, run_token:, lease_token:, status: %w[researching assessing monitoring_analyses])
+        changed = TopicInvestigation.where(id:, run_token:, lease_token:, status: %w[researching assessing monitoring_analyses])
           .where("lease_expires_at IS NULL OR lease_expires_at <= ?", now).update_all(
             status: "failed", stage: "failed", error_code: "interrupted", finished_at: now,
             lease_token: nil, lease_expires_at: nil, updated_at: now)
+        RefreshTopicReportJob.notify(id, run_token) if changed == 1
       end
       queued = TopicInvestigation.where(status: TopicResearchDelivery::DELIVERABLE)
         .where("lease_expires_at IS NULL OR lease_expires_at <= ?", now).order(:id).limit(LIMIT)

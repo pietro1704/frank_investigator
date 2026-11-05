@@ -22,6 +22,8 @@ A fact does not become false because a million sources repeat a falsehood, and a
 
 ## What It Does
 
+- **Live topic progress:** Post-commit Turbo notifications invalidate a frame that loads current state, so delayed jobs never broadcast old report snapshots. Reconnection closes missed-update gaps. A manual update link works without JavaScript. Partial article findings re-run the normal validators against matching generation/evidence fingerprints before publication.
+
 - **Article deepening:** Topic article buttons use the existing full URL pipeline and canonical report identity. Auth, rate limits and a generation fence protect submission; repeated clicks reuse the same report and durable delivery intent, preserving group ownership. The URL page displays progress, completion and failure.
 
 - **Article comparison:** Responsive cards compare central assertions, guarded verdicts, literal evidence and editorial observations. Factual challenges require a read original disputing the specific assertion. Shared evidence is disclosed without independence claims; editorial gaps do not imply deliberate omission.

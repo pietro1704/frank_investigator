@@ -1,5 +1,8 @@
 pt-BR:
   topics:
+    update_now: "Atualizar andamento"
+    updating: "Atualizando o relatório…"
+    partial_validated: "Resultados validados por notícia — a síntese geral ainda está em andamento."
     deepen: "Investigar esta notícia por completo"
     deepen_unavailable: "Não foi possível submeter a investigação completa. Tente novamente; um relatório existente será reutilizado."
     comparison:

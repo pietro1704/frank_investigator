@@ -1,5 +1,8 @@
 en:
   topics:
+    update_now: "Update progress"
+    updating: "Updating the report…"
+    partial_validated: "Validated article findings — overall synthesis is still in progress."
     deepen: "Investigate this article in full"
     deepen_unavailable: "The full investigation could not be submitted. Please try again; an existing report will be reused."
     comparison:

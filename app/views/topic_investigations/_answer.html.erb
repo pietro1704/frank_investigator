@@ -1,5 +1,5 @@
 <section class="mb-8 space-y-5" data-topic-answer>
-  <p class="text-sm text-muted"><%= @topic.report["scope"] %></p>
+  <p class="text-sm text-muted"><%= local_assigns.fetch(:scope, @topic.report["scope"]) %></p>
   <% answer.each do |group, points| %>
     <section data-answer-group="<%= group %>">
       <h2 class="font-serif text-2xl font-bold mb-3"><%= t("topics.answer.#{group}") %></h2>
@@ -20,5 +20,5 @@
       <% end %>
     </section>
   <% end %>
-  <ul class="list-disc pl-5 text-sm text-muted"><% Array(@topic.report["limitations"]).each do |text| %><li><%= text %></li><% end %></ul>
+  <ul class="list-disc pl-5 text-sm text-muted"><% Array(local_assigns.fetch(:limitations, @topic.report["limitations"])).each do |text| %><li><%= text %></li><% end %></ul>
 </section>

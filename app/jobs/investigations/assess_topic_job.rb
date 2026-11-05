@@ -20,7 +20,7 @@ module Investigations
       token = topic.claim_assessment!(run_token:)
       return unless token
       cancelled = -> { !topic.execution_current?(run_token:, lease_token: token, phase: "assessing") }
-      fingerprint = TopicResearchFingerprint.call(topic.discovery.slice("question", "scope", "plan", "documents", "news_ids", "full_analyses"))
+      fingerprint = TopicResearchFingerprint.discovery(topic.discovery)
       state = topic.assessment_checkpoint.deep_dup
       unless state["version"] == 1 && state["run_token"] == run_token && state["discovery_fingerprint"] == fingerprint
         state = { "version" => 1, "run_token" => run_token, "discovery_fingerprint" => fingerprint }
