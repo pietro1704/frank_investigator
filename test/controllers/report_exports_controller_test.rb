@@ -1,5 +1,6 @@
 require "test_helper"
 require "zip"
+require "ferrum"
 
 class ReportExportsControllerTest < ActionDispatch::IntegrationTest
   setup do
