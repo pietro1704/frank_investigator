@@ -71,7 +71,6 @@
         <p class="mb-3"><span class="<%= badge_class_for(item["verdict"]) %>"><%= t("topics.verdicts.#{item['verdict']}") %></span></p>
         <blockquote class="border-l-4 border-line pl-4 text-sm mb-4"><%= item["article_quote"] %></blockquote>
         <% if (url = topic_source_url(source["url"])) %><p class="mb-4 underline"><%= link_to t("topics.original"), url, target: "_blank", rel: "noopener noreferrer" %></p><% end %>
-        <% if item["analysis_slug"].present? %><p class="mb-4 underline"><%= link_to t("topics.full_report"), investigation_path(item["analysis_slug"]) %></p><% end %>
         <%= render "investigations/editorial_summary", summary: item %>
         <details class="mb-6"><summary class="font-semibold cursor-pointer"><%= t("topics.evidence", count: Array(item["evidence"]).size) %></summary>
           <% Array(item["evidence"]).each do |evidence| %>

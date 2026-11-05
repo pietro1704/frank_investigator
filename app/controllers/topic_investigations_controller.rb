@@ -30,6 +30,22 @@ class TopicInvestigationsController < ApplicationController
     end
   end
 
+  def deepen_article
+    @topic = TopicInvestigation.find_by!(slug: params[:id])
+    result = Investigations::DeepenTopicArticle.call(topic: @topic, generation: params[:generation], source_id: params[:source_id])
+    respond_to do |format|
+      format.html { redirect_to investigation_path(result.investigation), status: :see_other }
+      format.json { render json: { slug: result.investigation.slug, report_url: investigation_path(result.investigation),
+        status: result.investigation.status, delivery_deferred: result.delivery_deferred }, status: :accepted }
+    end
+  rescue Investigations::DeepenTopicArticle::Conflict
+    conflict
+  rescue Investigations::UrlNormalizer::InvalidUrlError, Investigations::UrlClassifier::RejectedUrlError
+    article_submission_error(:unprocessable_entity)
+  rescue Investigations::DeepenTopicArticle::Unavailable
+    article_submission_error(:service_unavailable)
+  end
+
   def cancel
     @topic = TopicInvestigation.find_by!(slug: params[:id])
     return conflict unless @topic.cancel!
@@ -71,6 +87,14 @@ class TopicInvestigationsController < ApplicationController
       report["full_analyses"] = Array(report["full_analyses"]).map { |item| item.except("evidence_documents") }
     end
     report
+  end
+
+  def article_submission_error(status)
+    @notice = t("topics.deepen_unavailable")
+    respond_to do |format|
+      format.html { render :show, status: }
+      format.json { render json: { error: "article_submission_unavailable", message: @notice }, status: }
+    end
   end
 
   def conflict
