@@ -83,6 +83,12 @@ jobs:
           COVERAGE: true
         run: bin/rails db:test:prepare test
 
+      - name: Evaluate fixed topic verdict cases without external calls
+        env:
+          RAILS_ENV: test
+          FRANK_EVAL_MODE: deterministic
+        run: bin/rails frank:evaluate_topics
+
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
         if: always()

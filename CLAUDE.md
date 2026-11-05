@@ -74,6 +74,9 @@ Tests use WebMock (`test/support/llm_stubs.rb`) to stub OpenRouter API calls. Th
 
 ## Key Architecture Decisions
 
+- **Topic article evidence must fit explicit reference years.** When a dated assertion and its cited passage/title have only disjoint years, keep that citation as context before deriving the verdict. A source’s producer label does not prove applicability to a current measurement.
+- **Topic evaluation separates guards from model quality.** `frank:evaluate_topics` defaults to fixed, hashed evidence and curated candidate responses. Keep gold labels/candidates outside live inference inputs. CI selects deterministic mode; provider failures and cancellation stay visible. Reassess annotations when changing the pinned source corpus.
+
 - **No JavaScript frameworks.** UI is server-rendered with Turbo Streams. No React, no Vue, no Stimulus controllers beyond what Rails provides.
 - **Tailwind CSS v4.** Propshaft pipeline with `tailwindcss-rails`. Custom theme in `app/assets/tailwind/application.css` with warm cream/brown palette. Utility-first classes in templates, minimal custom CSS for popovers and timeline.
 - **SQLite in production.** WAL mode, tuned pragmas. No Postgres dependency.

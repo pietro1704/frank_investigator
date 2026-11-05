@@ -131,6 +131,7 @@ en:
       insufficient_text: "No readable article text was available"
       fetch_failed: "The source could not be accessed"
   topic_assessment:
+    temporal_context: "The cited passage does not establish applicability to the year of this assertion. It remains context and cannot establish or refute the assessed figure."
     retrieval_limited: "Replacement and additional searches are bounded; missing originals and unreadable pages remain limitations, not evidence of falsity."
     adjusted: "Read the individual verdicts below. Some conclusions were limited because the available original evidence does not support a definitive assessment."
     unreadable: "Some sources could not be read. Their titles and search snippets were not used as factual evidence."

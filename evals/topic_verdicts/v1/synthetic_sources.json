@@ -1,0 +1,37 @@
+{
+  "contradicted": {
+    "id": "S2",
+    "url": "https://example.invalid/frank-eval/article-02",
+    "title": "O desmatamento medido pelo SAD na Amazônia Legal aumentou de janeiro a dezembro de 2024 em relação a 2023.",
+    "body": "O desmatamento medido pelo SAD na Amazônia Legal aumentou de janeiro a dezembro de 2024 em relação a 2023. Esta notícia é um cenário sintético de avaliação, não uma publicação real.",
+    "kind": "news_article"
+  },
+  "opinion": {
+    "id": "S2",
+    "url": "https://example.invalid/frank-eval/article-03",
+    "title": "O ministro foi um bom ministro.",
+    "body": "O ministro foi um bom ministro. Esta notícia é um cenário sintético de avaliação, não uma publicação real.",
+    "kind": "news_article"
+  },
+  "outdated": {
+    "id": "S2",
+    "url": "https://example.invalid/frank-eval/article-05",
+    "title": "A taxa atual de desmatamento na Amazônia Legal no ciclo de 2026 é de 6.288 km².",
+    "body": "A taxa atual de desmatamento na Amazônia Legal no ciclo de 2026 é de 6.288 km². Esta notícia é um cenário sintético de avaliação, não uma publicação real.",
+    "kind": "news_article"
+  },
+  "circle_a": {
+    "id": "S2",
+    "url": "https://example.invalid/frank-eval/article-06-a",
+    "title": "O desmatamento chegou a zero em 2024.",
+    "body": "O desmatamento chegou a zero em 2024. A notícia A cita apenas a notícia B em https://example.invalid/frank-eval/article-06-b como origem dessa informação. Não apresenta medição original.",
+    "kind": "news_article"
+  },
+  "circle_b": {
+    "id": "S3",
+    "url": "https://example.invalid/frank-eval/article-06-b",
+    "title": "A notícia A informa que o desmatamento chegou a zero em 2024.",
+    "body": "A notícia A informa que o desmatamento chegou a zero em 2024. A notícia B cita apenas A em https://example.invalid/frank-eval/article-06-a, sem dados próprios ou publicação original.",
+    "kind": "news_article"
+  }
+}
