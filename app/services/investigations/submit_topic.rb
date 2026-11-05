@@ -3,7 +3,7 @@ module Investigations
     class Conflict < StandardError; end
 
     def self.call(question:)
-      topic = TopicInvestigation.create!(question: TopicDiscovery.normalize_question(question))
+      topic = TopicInvestigation.create!(question: TopicDiscovery.normalize_question(question), analysis_mode: :brief)
       schedule(topic.id, topic.run_token)
       topic
     end
@@ -34,7 +34,8 @@ module Investigations
       topic.topic_analysis_links.for_run(previous).each do |link|
         topic.topic_analysis_links.create!(run_token: next_run, source_id: link.source_id, source_url: link.source_url, investigation_id: link.investigation_id)
       end
-      topic.update!(status: :awaiting_analyses, stage: "awaiting_analyses", run_token: next_run,
+      phase = topic.full_analysis_required? ? "awaiting_analyses" : "awaiting_assessment"
+      topic.update!(status: phase, stage: phase, run_token: next_run,
         discovery: snapshot, assessment_checkpoint: checkpoint, report: {}, error_code: nil, finished_at: nil,
         lease_token: nil, lease_expires_at: nil)
     end

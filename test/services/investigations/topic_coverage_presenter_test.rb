@@ -9,6 +9,17 @@ class TopicCoveragePresenterTest < ActiveSupport::TestCase
         { "id" => "S2", "url" => "https://two.example/report", "editorial_position" => "center", "editorial_confidence" => "provisional" } ] })
   end
 
+  test "brief coverage honors explicit article and editorial requests independently of full reports" do
+    topic = TopicInvestigation.create!(question: "Schools?", analysis_mode: :brief, status: :completed,
+      discovery: @topic.discovery, report: { "conclusion" => "Uncertain", "articles" => [ { "source_id" => "S1" }, { "source_id" => "S2" } ] })
+    result = TopicCoveragePresenter.call(topic)
+    assert_equal 2, result["analyzed"]
+    assert_equal 6, result["requested"]
+    refute result["complete"]
+    assert_equal 1, result.dig("editorial_quotas", "left", "missing")
+    assert_empty topic.topic_analysis_links
+  end
+
   def link(id, url, **attributes)
     @topic.topic_analysis_links.create!({ source_id: id, source_url: url, run_token: @topic.run_token }.merge(attributes))
   end

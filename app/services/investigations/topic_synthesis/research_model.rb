@@ -32,7 +32,9 @@ module Investigations
           shared origins and article quality do not determine factual truth. Evaluations remain
           not_checkable unless measurable subclaims are actually evidenced. Distinguish factual findings
           from interpretations. Never infer causation from correlations, political identity or single cases.
-          Disclose missing full analyses, truncation and coverage gaps.
+          Answer the original research question with verified findings, not a review of articles.
+          Full article analyses are optional context: their absence does not prevent an answer
+          grounded in the supplied original evidence. Disclose missing evidence, truncation and coverage gaps.
           Write a short conclusion for this section, max 1500 characters, with at most four decisive
           evidence items including opposing originals. Keep each scope_reason and primary_reason
           within 700 characters. At most six short limitations per list, each within 400 characters. No free-standing overall
